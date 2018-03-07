@@ -1,6 +1,6 @@
 package tvestergaard.webhelpers.parameters;
 
-public interface MultiFormData extends Form
+public interface MultiFormData extends Parameters
 {
 
 }
