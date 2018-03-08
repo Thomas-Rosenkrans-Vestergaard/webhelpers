@@ -304,12 +304,12 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertTrue(parameter.notShorterThan(1));
-        Mockito.verify(mock, Mockito.times(0)).notShorter(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).notShorterThan(same(parameter), any(Integer.class));
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.notShorterThan(7));
-        Mockito.verify(mock, Mockito.times(1)).notShorter(same(parameter), eq(7));
+        Mockito.verify(mock, Mockito.times(1)).notShorterThan(same(parameter), eq(7));
     }
 
     @Test

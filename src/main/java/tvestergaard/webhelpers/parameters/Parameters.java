@@ -1,31 +1,53 @@
 package tvestergaard.webhelpers.parameters;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import tvestergaard.webhelpers.parameters.tomcat.HttpServletRequestDataMapper;
 
-public interface Parameters
+import javax.servlet.http.HttpServletRequest;
+import java.util.function.Consumer;
+
+public class Parameters
 {
 
     /**
-     * The default date format used by the {@link Parameters}.
+     * The {@link ParameterDataMapper} providing the data in the form.
      */
-    String DEFAULT_DATE_FORMAT = "yyyy-mm-dd";
+    private ParameterDataMapper mapper;
 
     /**
-     * Returns the {@link ParameterDataMapper} providing the form data to the {@link Parameters}.
-     *
-     * @return The {@link ParameterDataMapper}.
+     * The {@link ParametersErrorHandler} that provides error handlers for the {@link Parameter} instances created by this.
      */
-    ParameterDataMapper getDataMapper();
+    private ParametersErrorHandler errorHandler;
+
+    /**
+     * Creates a new {@link Parameters}.
+     *
+     * @param dataMapper The {@link ParameterDataMapper} providing the data in the form.
+     */
+    public Parameters(ParameterDataMapper dataMapper)
+    {
+        this.mapper = dataMapper;
+    }
+
+    /**
+     * Creates a new {@link Parameters} for an incoming {@code HttpServletRequest}.
+     *
+     * @param request The
+     */
+    public Parameters(HttpServletRequest request)
+    {
+        this(new HttpServletRequestDataMapper(request));
+    }
 
     /**
      * Returns {@code true} if the form contains a mapping from the provided {@code key}.
      *
      * @param key The key to check for.
-     * @return {@code true} if the form contains a mapping from the provided {@code key}. Returns {@code false}
-     * in all other cases.
+     * @return {@code true} if the {@link Parameters} contains a mapping from the provided {@code key}, {@code false} in all other cases.
      */
-    boolean has(String key);
+    public boolean has(String key)
+    {
+        return mapper.has(key);
+    }
 
     /**
      * Checks if the value associated with the provided {@code key} in the {@link ParameterDataMapper} can safely be
@@ -38,126 +60,51 @@ public interface Parameters
      * @return {@code true} if the mapping can safely be converted to an instance of {@link TextParameter}.
      * @see Parameters#getText(String)
      */
-    boolean isText(String key);
+    public boolean isText(String key)
+    {
+        return mapper.has(key);
+    }
+
+    public TextParameter getText(String key, ErrorHandlerList<TextParameterErrorHandler> errorHandler)
+    {
+        if (mapper.has(key))
+            return new TextParameter(key, mapper.get(key), errorHandler);
+
+        throw new InputConversionException(this, TextParameter.class);
+    }
 
     /**
      * Creates and returns an instance of {@link TextParameter} representing the value associated with the provided {@code key}.
      * <p>
-     * No {@code Exception} will be called if the {@link Parameters#isDate(String)} method returns {@code true} for the
+     * No {@code Exception} will be called if the {@link Parameters#isText(String)} method returns {@code true} for the
      * same {@code key}.
      *
      * @param key The {@code key} of the mapping to convert.
      * @return The converted instance of {@link TextParameter}.
      * @throws InputConversionException When the mapping with the provided {@code key} cannot be converted.
      */
-    TextParameter getText(String key) throws InputConversionException;
-
-    /**
-     * Checks if the value associated with the provided {@code key} in the {@link ParameterDataMapper} can safely be
-     * converted to an {@link DateParameter} using the {@link Parameters#getDate(String)} method.
-     * <p>
-     * The value can be safely converted when the value of the parameters matches the {@link Parameters#DEFAULT_DATE_FORMAT}.
-     * <p>
-     * You can be sure that {@link Parameters#getDate(String)} will never throw an {@link InputConversionException}
-     * when the result of {@code isDate(String)} on the same {@code key} is {@code true}.
-     *
-     * @param key The key of the value to check.
-     * @param key The format to check the value against.
-     * @return {@code true} if the mapping can safely be converted to an instance of {@link DateParameter}.
-     * @see Parameters#getDate(String)
-     */
-    default boolean isDate(String key)
+    public TextParameter getText(String key) throws InputConversionException
     {
-        return isDate(key, new SimpleDateFormat(DEFAULT_DATE_FORMAT));
+        return getText(key, new ErrorHandlerList<>(errorHandler.getTextErrorHandler()));
     }
 
-    /**
-     * Checks if the value associated with the provided {@code key} in the {@link ParameterDataMapper} can safely be
-     * converted to an {@link DateParameter} using the {@link Parameters#getDate(String)} method.
-     * <p>
-     * The value can be safely converted when the value of the parameters matches the provided {@code DateFormat}.
-     * <p>
-     * You can be sure that {@link Parameters#getDate(String)} will never throw an {@link InputConversionException}
-     * when the result of {@code isDate(String)} on the same {@code key} is {@code true}.
-     *
-     * @param key The key of the value to check.
-     * @param key The format to check the value against.
-     * @return {@code true} if the mapping can safely be converted to an instance of {@link DateParameter}.
-     * @see Parameters#getDate(String)
-     */
-    boolean isDate(String key, DateFormat format);
-
-    /**
-     * Creates and returns an instance of {@link DateParameter} representing the value associated with the provided {@code key}.
-     * <p>
-     * The default date format of {@link Parameters#DEFAULT_DATE_FORMAT} is used during this operation.
-     * <p>
-     * No {@code Exception} will be called if the {@link Parameters#isDate(String)} method returns {@code true} for the
-     * same {@code key}.
-     *
-     * @param key The key of the mapping to convert.
-     * @return The converted instance of {@link DateParameter}.
-     * @throws InputConversionException When the mapping with the provided {@code key} cannot be converted.
-     */
-    default DateParameter getDate(String key) throws InputConversionException
+    public boolean checkText(String key, ErrorHandlerList<TextParameterErrorHandler> errorHandlers, Consumer<TextParameter> consumer)
     {
-        return getDate(key, new SimpleDateFormat(DEFAULT_DATE_FORMAT));
+        TextParameterErrorCounter counter = new TextParameterErrorCounter();
+        errorHandlers.add(counter);
+        TextParameter textParameter = getText(key, errorHandlers);
+        consumer.accept(textParameter);
+
+        return counter.getCount() == 0;
     }
 
-    /**
-     * Creates and returns an instance of {@link DateParameter} representing the value associated with the provided {@code key}.
-     * <p>
-     * No {@code Exception} will be called if the {@link Parameters#isDate(String, DateFormat)} method returns {@code true} for the
-     * same {@code key} and {@code format}.
-     *
-     * @param key    The key of the mapping to convert.
-     * @param format The format of the date value to convert.
-     * @return The converted instance of {@link DateParameter}.
-     * @throws InputConversionException When the mapping with the provided {@code key} cannot be converted.
-     */
-    DateParameter getDate(String key, DateFormat format) throws InputConversionException;
+    public boolean checkText(String key, TextParameterErrorHandler errorHandler, Consumer<TextParameter> consumer)
+    {
+        return checkText(key, new ErrorHandlerList<>(errorHandler), consumer);
+    }
 
-    /**
-     * Checks if the value associated with the provided {@code key} in the {@link ParameterDataMapper} can safely be
-     * converted to an {@link DateParameter} using the {@link Parameters#getEmail(String)} method.
-     * <p>
-     * The value can be safely converted when the value of the parameters is a valid email address.
-     * <p>
-     * You can be sure that {@link Parameters#getEmail(String)} will never throw an {@link InputConversionException}
-     * when the result of {@code isDate(String)} on the same {@code key} is {@code true}.
-     *
-     * @param key The key of the value to check.
-     * @param key The format to check the value against.
-     * @return {@code true} if the mapping can safely be converted to an instance of {@link DateParameter}.
-     * @see Parameters#getEmail(String)
-     */
-    boolean isEmail(String key);
-
-    /**
-     * Creates and returns an instance of {@link EmailParameter} representing the value associated with the provided {@code key}.
-     * <p>
-     * No {@code Exception} will be called if the {@link Parameters#isEmail(String)} method returns {@code true} for the
-     * same {@code key}.
-     *
-     * @param key The {@code key} of the mapping to convert.
-     * @return The converted instance of {@link TextParameter}.
-     * @throws InputConversionException When the mapping with the provided {@code key} cannot be converted.
-     */
-    EmailParameter getEmail(String key) throws InputConversionException;
-
-    boolean isNumber(String key);
-
-    FloatParameter getNumber(String key) throws InputConversionException;
-
-    boolean isTime(String key);
-
-    TimeParameter getTime(String key) throws InputConversionException;
-
-    boolean isRange(String key);
-
-    RangeParameter getRange(String key) throws InputConversionException;
-
-    boolean isUrl(String key);
-
-    UrlParameter getUrl(String key) throws InputConversionException;
+    public boolean checkText(String key, Consumer<TextParameter> consumer)
+    {
+        return checkText(key, errorHandler.getTextErrorHandler(), consumer);
+    }
 }

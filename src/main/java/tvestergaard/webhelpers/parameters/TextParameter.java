@@ -21,7 +21,7 @@ public class TextParameter extends AbstractParameter
     /**
      * The object containing the errorHandler for check onErrors.
      */
-    private final TextParameterErrorHandler errorHandler;
+    private final ErrorHandlerList<TextParameterErrorHandler> errorHandlers;
 
     /**
      * Creates a new {@link TextParameter}.
@@ -30,13 +30,18 @@ public class TextParameter extends AbstractParameter
      * @param value        The value of the {@link TextParameter}.
      * @param errorHandler The object containing the errorHandler for check onErrors.
      */
-    public TextParameter(String name, String value, TextParameterErrorHandler errorHandler)
+    public TextParameter(String name, String value, ErrorHandlerList<TextParameterErrorHandler> errorHandler)
     {
         super(name);
 
         this.value = value;
         this.length = value.length();
-        this.errorHandler = errorHandler;
+        this.errorHandlers = errorHandler;
+    }
+
+    public TextParameter(String name, String value, TextParameterErrorHandler... errorHandler)
+    {
+        this(name, value, new ErrorHandlerList<>(errorHandler));
     }
 
     /**
@@ -56,50 +61,60 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} equals the provided {@code CharSequence}.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#is(TextParameter, CharSequence)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object
+     * are notified when this check fails.
      *
-     * @param other   The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param other            The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value equals the provided {code CharSequence}, {@code false} in all other cases.
      */
-    public boolean is(CharSequence other, BiConsumer<TextParameter, CharSequence> onError)
+    public boolean is(CharSequence other, BiConsumer<TextParameter, CharSequence>... onErrorConsumers)
     {
-        boolean result = other.equals(value);
-        if (!result && onError != null)
-            onError.accept(this, other);
+        boolean result = is(other);
+        if (!result) {
+            for (BiConsumer<TextParameter, CharSequence> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, other);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.is(this, other);
+        }
 
         return result;
     }
 
-
     /**
      * Checks that the internal value of the {@link TextParameter} equals the provided {@code CharSequence}.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#is(TextParameter, CharSequence)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The the {@link TextParameterErrorHandler#is(TextParameter, CharSequence)} method on the
+     * {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
      * @param other The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
      * @return {@code true} if the value equals the provided {@code CharSequence}, {@code false} in all other cases.
      */
     public boolean is(CharSequence other)
     {
-        return is(other, errorHandler::is);
+        return other.equals(value);
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} does not equal the provided {@code CharSequence}.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#not(TextParameter, CharSequence)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param other   The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param other            The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that is called when the check fails.
      * @return {@code true} if the value does not equal the provided {code CharSequence}, {@code false} in all other cases.
      */
-    public boolean not(CharSequence other, BiConsumer<TextParameter, CharSequence> onError)
+    public boolean not(CharSequence other, BiConsumer<TextParameter, CharSequence>... onErrorConsumers)
     {
-        boolean result = !other.equals(value);
-        if (!result && onError != null)
-            onError.accept(this, other);
+        boolean result = not(other);
+        if (!result) {
+            for (BiConsumer<TextParameter, CharSequence> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, other);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.not(this, other);
+        }
 
         return result;
     }
@@ -107,59 +122,70 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} does not equal the provided {@code CharSequence}.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#not(TextParameter, CharSequence)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#not(TextParameter, CharSequence)} method on the
+     * {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
      * @param other The {@code CharSequence} to compare the internal value of the {@link TextParameter} to.
      * @return {@code true} if the value does not equal the provided {@code CharSequence}, {@code false} in all other cases.
      */
     public boolean not(CharSequence other)
     {
-        return not(other, errorHandler::not);
+        return !other.equals(this.value);
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is empty.
      * <p>
-     * Notifies the provided {@code Consumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#isEmpty(TextParameter)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param onError The {@code Consumer} that is called when the check fails.
+     * @param onErrorConsumers The {@code Consumer} that are called when the check fails.
      * @return {@code true} if the value is empty, {@code false} in all other cases.
      */
-    public boolean isEmpty(Consumer<TextParameter> onError)
+    public boolean isEmpty(Consumer<TextParameter>... onErrorConsumers)
     {
-        boolean result = isLength(0);
-        if (!result && onError != null)
-            onError.accept(this);
+        boolean result = isEmpty();
+        if (!result) {
+            for (Consumer<TextParameter> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.isEmpty(this);
+        }
+
         return result;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is empty.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isEmpty(TextParameter)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#isEmpty(TextParameter)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @return {@code true} if the value is empty, {@code false} in all other cases.
      */
     public boolean isEmpty()
     {
-        return isEmpty(errorHandler::isEmpty);
+        return isLength(0);
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is not empty.
      * <p>
-     * Notifies the provided {@code Consumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#notEmpty(TextParameter)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param onError The {@code Consumer} that is called when the check fails.
+     * @param onErrorConsumers The {@code Consumer}(s) that are called when the check fails.
      * @return {@code true} if the value is not empty, {@code false} in all other cases.
      */
-    public boolean notEmpty(Consumer<TextParameter> onError)
+    public boolean notEmpty(Consumer<TextParameter>... onErrorConsumers)
     {
-        boolean result = !isLength(0);
-        if (!result && onError != null)
-            onError.accept(this);
+        boolean result = notEmpty();
+        if (!result) {
+            for (Consumer<TextParameter> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.notEmpty(this);
+        }
 
         return result;
     }
@@ -167,30 +193,35 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is not empty.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isEmpty(TextParameter)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#notEmpty(TextParameter)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @return {@code true} if the value is not empty, {@code false} in all other cases.
      */
     public boolean notEmpty()
     {
-        return notEmpty(errorHandler::notEmpty);
+        return !isLength(0);
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is empty.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#isLength(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must be for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must be for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value is empty, {@code false} in all other cases.
      */
-    public boolean isLength(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean isLength(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
         boolean result = length == n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.isLength(this, n);
+        }
 
         return result;
     }
@@ -198,31 +229,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is of the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isLength(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#isLength(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must be for the check to pass.
      * @return {@code true} if the value is of the provided length, {@code false} in all other cases.
      */
     public boolean isLength(int n)
     {
-        return isLength(n, errorHandler::isLength);
+        return this.value.length() == n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is not of the provided length.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#notLength(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must not be for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must not be for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value is not of the provided length, {@code false} in all other cases.
      */
-    public boolean notLength(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean notLength(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
         boolean result = length != n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.notLength(this, n);
+        }
 
         return result;
     }
@@ -230,31 +266,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is not of the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#notLength(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#notLength(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must not be for the check to pass.
      * @return {@code true} if the value is not of the provided length, {@code false} in all other cases.
      */
     public boolean notLength(int n)
     {
-        return notLength(n, errorHandler::notLength);
+        return value.length() != n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is shorter than the provided length.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#isShorterThan(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must be shorter than for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must be shorter than for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value is shorter than the provided length, {@code false} in all other cases.
      */
-    public boolean isShorterThan(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean isShorterThan(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
         boolean result = length < n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.isShorterThan(this, n);
+        }
 
         return result;
     }
@@ -262,31 +303,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is shorter than the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isShorterThan(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#isShorterThan(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must be shorter than for the check to pass.
      * @return {@code true} if the value is shorter than the provided length, {@code false} in all other cases.
      */
     public boolean isShorterThan(int n)
     {
-        return isShorterThan(n, errorHandler::isShorterThan);
+        return value.length() < n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is not shorter than the provided length.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#notShorterThan(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must not be shorter than for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must not be shorter than for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value is not shorter than the provided length, {@code false} in all other cases.
      */
-    public boolean notShorterThan(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean notShorterThan(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
-        boolean result = length >= n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        boolean result = notShorterThan(n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.notShorterThan(this, n);
+        }
 
         return result;
     }
@@ -294,31 +340,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is not shorter than the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#notShorter(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#notShorterThan(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must not be shorter than for the check to pass.
      * @return {@code true} if the value is not shorter than the provided length, {@code false} in all other cases.
      */
     public boolean notShorterThan(int n)
     {
-        return notShorterThan(n, errorHandler::notShorter);
+        return value.length() >= n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is longer than the provided length.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#isLongerThan(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must be longer than for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must be longer than for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the length of the value is longer than the provided length, {@code false} in all other cases.
      */
-    public boolean isLongerThan(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean isLongerThan(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
-        boolean result = length > n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        boolean result = isLongerThan(n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.isLongerThan(this, n);
+        }
 
         return result;
     }
@@ -326,31 +377,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is longer than the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isLongerThan(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#isLongerThan(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must be shorter than for the check to pass.
      * @return {@code true} if the value is longer than the provided length, {@code false} in all other cases.
      */
     public boolean isLongerThan(int n)
     {
-        return isLongerThan(n, errorHandler::isLongerThan);
+        return value.length() > n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} is not longer than the provided length.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#notLongerThan(TextParameter, int)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param n       The length the internal value of the {@link TextParameter} must not be shorter than for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param n                The length the internal value of the {@link TextParameter} must not be shorter than for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value is not longer than the provided length, {@code false} in all other cases.
      */
-    public boolean notLongerThan(int n, BiConsumer<TextParameter, Integer> onError)
+    public boolean notLongerThan(int n, BiConsumer<TextParameter, Integer>... onErrorConsumers)
     {
-        boolean result = length <= n;
-        if (!result && onError != null)
-            onError.accept(this, n);
+        boolean result = notLongerThan(n);
+        if (!result) {
+            for (BiConsumer<TextParameter, Integer> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, n);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.notLongerThan(this, n);
+        }
 
         return result;
     }
@@ -358,31 +414,36 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} is not longer than the provided length.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#notLongerThan(TextParameter, int)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#notLongerThan(TextParameter, int)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param n The length the internal value of the {@link TextParameter} must be shorter than for the check to pass.
      * @return {@code true} if the value is not longer than the provided length, {@code false} in all other cases.
      */
     public boolean notLongerThan(int n)
     {
-        return notLongerThan(n, errorHandler::notLongerThan);
+        return value.length() <= n;
     }
 
     /**
      * Checks that the internal value of the {@link TextParameter} matches that of the provided {@code Pattern}.
      * <p>
-     * Notifies the provided {@code BiConsumer} if the check fails.
+     * The {@link BiConsumer}s provided to the method, and the {@link TextParameterErrorHandler#isMatch(TextParameter, Pattern)}
+     * method on the {@link TextParameterErrorHandler} objects provided to this object are notified when this check fails.
      *
-     * @param pattern The {@code Pattern} the internal value of the {@link TextParameter} must match for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param pattern          The {@code Pattern} the internal value of the {@link TextParameter} must match for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value matches that of the provided {@code Pattern}, {@code false} in all other cases.
      */
-    public boolean isMatch(Pattern pattern, BiConsumer<TextParameter, Pattern> onError)
+    public boolean isMatch(Pattern pattern, BiConsumer<TextParameter, Pattern>... onErrorConsumers)
     {
-        boolean result = pattern.matcher(this.value).find();
-        if (!result && onError != null)
-            onError.accept(this, pattern);
+        boolean result = isMatch(pattern);
+        if (!result) {
+            for (BiConsumer<TextParameter, Pattern> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, pattern);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.isMatch(this, pattern);
+        }
 
         return result;
     }
@@ -390,15 +451,15 @@ public class TextParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link TextParameter} matches that of the provided {@code Pattern}.
      * <p>
-     * Notifies the {@link TextParameterErrorHandler#isMatch(TextParameter, Pattern)} method on the
-     * {@link TextParameterErrorHandler} object provided to the {@link TextParameter}.
+     * The {@link TextParameterErrorHandler#isMatch(TextParameter, Pattern)} method on the {@link TextParameterErrorHandler}
+     * objects provided to this object are notified when this check fails.
      *
      * @param pattern The {@code Pattern} the internal value of the {@link TextParameter} must match for the check to pass.
      * @return {@code true} if the value matches that of the provided {@code Pattern}, {@code false} in all other cases.
      */
     public boolean isMatch(Pattern pattern)
     {
-        return isMatch(pattern, errorHandler::isMatch);
+        return pattern.matcher(value).find();
     }
 
     /**
@@ -406,15 +467,19 @@ public class TextParameter extends AbstractParameter
      * <p>
      * Notifies the provided {@code BiConsumer} if the check fails.
      *
-     * @param pattern The {@code Pattern} the internal value of the {@link TextParameter} must match for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param pattern          The {@code Pattern} the internal value of the {@link TextParameter} must match for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value doesn't match that of the provided {@code Pattern}, {@code false} in all other cases.
      */
-    public boolean notMatch(Pattern pattern, BiConsumer<TextParameter, Pattern> onError)
+    public boolean notMatch(Pattern pattern, BiConsumer<TextParameter, Pattern>... onErrorConsumers)
     {
-        boolean result = !pattern.matcher(this.value).find();
-        if (!result && onError != null)
-            onError.accept(this, pattern);
+        boolean result = notMatch(pattern);
+        if (!result) {
+            for (BiConsumer<TextParameter, Pattern> onErrorConsumer : onErrorConsumers)
+                onErrorConsumer.accept(this, pattern);
+            for (TextParameterErrorHandler errorHandler : errorHandlers)
+                errorHandler.notMatch(this, pattern);
+        }
 
         return result;
     }
@@ -430,7 +495,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notMatch(Pattern pattern)
     {
-        return notMatch(pattern, errorHandler::notMatch);
+        return !pattern.matcher(value).find();
     }
 
     /**
@@ -438,11 +503,11 @@ public class TextParameter extends AbstractParameter
      * <p>
      * Notifies the provided {@code BiConsumer} if the check fails.
      *
-     * @param patterns The list of {@code CharSequence} instances the internal value of the {@link TextParameter} must match for the check to pass.
-     * @param onError  The {@code BiConsumer} that is called when the check fails.
+     * @param patterns         The list of {@code CharSequence} instances the internal value of the {@link TextParameter} must match for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value equals at least one of the provided instances of {@code CharSequence}, {@code false} in all other cases.
      */
-    public boolean isIn(List<? extends CharSequence> patterns, BiConsumer<TextParameter, List<? extends CharSequence>> onError)
+    public boolean isIn(List<? extends CharSequence> patterns, BiConsumer<TextParameter, List<? extends CharSequence>> onErrorConsumers)
     {
         for (CharSequence pattern : patterns) {
             if (value.equals(pattern)) {
@@ -473,11 +538,11 @@ public class TextParameter extends AbstractParameter
      * <p>
      * Notifies the provided {@code TriConsumer} if the check fails.
      *
-     * @param patterns The list of {@code CharSequence} instances the internal value of the {@link TextParameter} must not match for the check to pass.
-     * @param onError  The {@code TriConsumer} that is called when the check fails.
+     * @param patterns         The list of {@code CharSequence} instances the internal value of the {@link TextParameter} must not match for the check to pass.
+     * @param onErrorConsumers The {@code TriConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value equals none of the provided instances of {@code CharSequence}, {@code false} in all other cases.
      */
-    public boolean notIn(List<? extends CharSequence> patterns, TriConsumer<TextParameter, List<? extends CharSequence>, Integer> onError)
+    public boolean notIn(List<? extends CharSequence> patterns, TriConsumer<TextParameter, List<? extends CharSequence>, Integer> onErrorConsumers)
     {
         int size = patterns.size();
         for (int x = 0; x < size; x++) {
@@ -509,11 +574,11 @@ public class TextParameter extends AbstractParameter
      * <p>
      * Notifies the provided {@code BiConsumer} if the check fails.
      *
-     * @param other   The other {@code CharSequence} instance the internal value of the {@link TextParameter} must contain for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param other            The other {@code CharSequence} instance the internal value of the {@link TextParameter} must contain for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value contains the provided {@code CharSequence}, {@code false} in all other cases.
      */
-    public boolean contains(CharSequence other, BiConsumer<TextParameter, CharSequence> onError)
+    public boolean contains(CharSequence other, BiConsumer<TextParameter, CharSequence> onErrorConsumers)
     {
         boolean result = this.value.contains(other);
         if (!result)
@@ -541,11 +606,11 @@ public class TextParameter extends AbstractParameter
      * <p>
      * Notifies the provided {@code BiConsumer} if the check fails.
      *
-     * @param other   The other {@code CharSequence} instance the internal value of the {@link TextParameter} must not contain for the check to pass.
-     * @param onError The {@code BiConsumer} that is called when the check fails.
+     * @param other            The other {@code CharSequence} instance the internal value of the {@link TextParameter} must not contain for the check to pass.
+     * @param onErrorConsumers The {@code BiConsumer}(s) that are called when the check fails.
      * @return {@code true} if the value doesn't contain the provided {@code CharSequence}, {@code false} in all other cases.
      */
-    public boolean notContains(CharSequence other, BiConsumer<TextParameter, CharSequence> onError)
+    public boolean notContains(CharSequence other, BiConsumer<TextParameter, CharSequence> onErrorConsumers)
     {
         boolean result = !value.contains(other);
         if (!result)

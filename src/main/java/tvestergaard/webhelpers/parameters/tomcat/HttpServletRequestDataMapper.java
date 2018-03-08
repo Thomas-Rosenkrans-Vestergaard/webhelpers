@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
  * Implementation of the {@link ParameterDataMapper} interface to wrap instances of {@link HttpServletRequest} for use in
  * {@link Parameters} implementations.
  */
-public class HttpServletRequestParameterDataMapper implements ParameterDataMapper
+public class HttpServletRequestDataMapper implements ParameterDataMapper
 {
 
     /**
@@ -18,11 +18,11 @@ public class HttpServletRequestParameterDataMapper implements ParameterDataMappe
     private final HttpServletRequest request;
 
     /**
-     * Creates a new {@link HttpServletRequestParameterDataMapper}.
+     * Creates a new {@link HttpServletRequestDataMapper}.
      *
      * @param request The internal {@code HttpServletRequest} that methods are delegated to.
      */
-    public HttpServletRequestParameterDataMapper(HttpServletRequest request)
+    public HttpServletRequestDataMapper(HttpServletRequest request)
     {
         this.request = request;
     }
