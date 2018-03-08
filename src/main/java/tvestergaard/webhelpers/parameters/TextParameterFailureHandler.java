@@ -4,23 +4,31 @@ package tvestergaard.webhelpers.parameters;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback,
-                                                   TextParameter.NotErrorCallback,
-                                                   TextParameter.IsEmptyErrorCallback,
-                                                   TextParameter.NotEmptyErrorCallback,
-                                                   TextParameter.IsLengthErrorCallback,
-                                                   TextParameter.NotLengthErrorCallback,
-                                                   TextParameter.IsShorterThanErrorCallback,
-                                                   TextParameter.NotShorterThanErrorCallback,
-                                                   TextParameter.IsLongerThanErrorCallback,
-                                                   TextParameter.NotLongerThanErrorCallback,
-                                                   TextParameter.IsMatchErrorCallback,
-                                                   TextParameter.NotMatchErrorCallback,
-                                                   TextParameter.IsInErrorCallback,
-                                                   TextParameter.NotInErrorCallback,
-                                                   TextParameter.IsContainedErrorCallback,
-                                                   TextParameter.NotContainedErrorCallback
+public interface TextParameterFailureHandler extends TextParameter.IsFailureCallback,
+                                                     TextParameter.NotFailureCallback,
+                                                     TextParameter.IsEmptyFailureCallback,
+                                                     TextParameter.NotEmptyFailureCallback,
+                                                     TextParameter.IsLengthFailureCallback,
+                                                     TextParameter.NotLengthFailureCallback,
+                                                     TextParameter.IsShorterThanFailureCallback,
+                                                     TextParameter.NotShorterThanFailureCallback,
+                                                     TextParameter.IsLongerThanFailureCallback,
+                                                     TextParameter.NotLongerThanFailureCallback,
+                                                     TextParameter.IsMatchFailureCallback,
+                                                     TextParameter.NotMatchFailureCallback,
+                                                     TextParameter.IsInFailureCallback,
+                                                     TextParameter.NotInFailureCallback,
+                                                     TextParameter.IsContainedFailureCallback,
+                                                     TextParameter.NotContainedFailureCallback
 {
+
+    /**
+     * An no-op implementation of the {@link TextParameterFailureHandler}.
+     */
+    TextParameterFailureHandler EMPTY_FAILURE_HANDLER = new TextParameterFailureHandler()
+    {
+
+    };
 
     /**
      * The method called when the {@link TextParameter#is(CharSequence)} check method fails.
@@ -28,7 +36,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link Parameter} on which the {@link TextParameter#is(CharSequence)} check method failed.
      * @param other     The {@code CharSequence} provided to the {@link TextParameter#is(CharSequence)}.
      */
-    @Override default void isError(TextParameter parameter, CharSequence other)
+    @Override default void isFailure(TextParameter parameter, CharSequence other)
     {
 
     }
@@ -39,7 +47,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link Parameter} on which the {@link TextParameter#not(CharSequence)} check method failed.
      * @param other     The {@code CharSequence} provided to the {@link TextParameter#not(CharSequence)}.
      */
-    @Override default void notError(TextParameter parameter, CharSequence other)
+    @Override default void notFailure(TextParameter parameter, CharSequence other)
     {
 
     }
@@ -49,7 +57,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      *
      * @param parameter The {@link Parameter} on which the {@link TextParameter#isEmpty()} check method failed.
      */
-    @Override default void isEmptyError(TextParameter parameter)
+    @Override default void isEmptyFailure(TextParameter parameter)
     {
 
     }
@@ -59,7 +67,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      *
      * @param parameter The {@link Parameter} on which the {@link TextParameter#notEmpty()} check method failed.
      */
-    @Override default void notEmptyError(TextParameter parameter)
+    @Override default void notEmptyFailure(TextParameter parameter)
     {
 
     }
@@ -70,7 +78,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link Parameter} on which the {@link TextParameter#isLength(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#isLength(int)} check that failed.
      */
-    @Override default void isLengthError(TextParameter parameter, int check)
+    @Override default void isLengthFailure(TextParameter parameter, int check)
     {
 
     }
@@ -81,7 +89,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link Parameter} on which the {@link TextParameter#notLength(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#notLength(int)} check that failed.
      */
-    @Override default void notLengthError(TextParameter parameter, int check)
+    @Override default void notLengthFailure(TextParameter parameter, int check)
     {
 
     }
@@ -92,7 +100,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#isShorterThan(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#isShorterThan(int)} check that failed.
      */
-    @Override default void isShorterThanError(TextParameter parameter, int check)
+    @Override default void isShorterThanFailure(TextParameter parameter, int check)
     {
 
     }
@@ -103,7 +111,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#notShorterThan(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#notShorterThan(int)} check that failed.
      */
-    @Override default void notShorterThanError(TextParameter parameter, int check)
+    @Override default void notShorterThanFailure(TextParameter parameter, int check)
     {
 
     }
@@ -114,7 +122,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#isLongerThan(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#isLongerThan(int)} check that failed.
      */
-    @Override default void isLongerThanError(TextParameter parameter, int check)
+    @Override default void isLongerThanFailure(TextParameter parameter, int check)
     {
 
     }
@@ -125,7 +133,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#notLongerThan(int)} check method failed.
      * @param check     The length provided to the {@link TextParameter#notLongerThan(int)} check that failed.
      */
-    @Override default void notLongerThanError(TextParameter parameter, int check)
+    @Override default void notLongerThanFailure(TextParameter parameter, int check)
     {
 
     }
@@ -136,7 +144,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#isMatch(Pattern)} check method failed.
      * @param pattern   The {@code Pattern} provided to the {@link TextParameter#isMatch(Pattern)} check that failed.
      */
-    @Override default void isMatchError(TextParameter parameter, Pattern pattern)
+    @Override default void isMatchFailure(TextParameter parameter, Pattern pattern)
     {
 
     }
@@ -147,7 +155,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#notMatch(Pattern)} check method failed.
      * @param pattern   The {@code Pattern} provided to the {@link TextParameter#notMatch(Pattern)} check that failed.
      */
-    @Override default void notMatchError(TextParameter parameter, Pattern pattern)
+    @Override default void notMatchFailure(TextParameter parameter, Pattern pattern)
     {
 
     }
@@ -158,7 +166,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#isIn(List)} check method failed.
      * @param patterns  The list of {@code CharSequence} instances provided to the {@link TextParameter#isIn(List)} check that failed.
      */
-    @Override default void isInError(TextParameter parameter, List<? extends CharSequence> patterns)
+    @Override default void isInFailure(TextParameter parameter, List<? extends CharSequence> patterns)
     {
 
     }
@@ -170,7 +178,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param patterns  The list of {@code CharSequence} instances provided to the {@link TextParameter#notIn(List)} check that failed.
      * @param collision The index of the {@code CharSequence} in the provided list that caused the check to fail.
      */
-    @Override default void notInError(TextParameter parameter, List<? extends CharSequence> patterns, int collision)
+    @Override default void notInFailure(TextParameter parameter, List<? extends CharSequence> patterns, int collision)
     {
 
     }
@@ -181,7 +189,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#isContained(CharSequence)} check method failed.
      * @param other     The {@code CharSequence} provided to the {@link TextParameter#isContained(CharSequence)} check that failed.
      */
-    @Override default void isContainedError(TextParameter parameter, CharSequence other)
+    @Override default void isContainedFailure(TextParameter parameter, CharSequence other)
     {
 
     }
@@ -192,7 +200,7 @@ public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback
      * @param parameter The {@link TextParameter} on which the {@link TextParameter#notContained(CharSequence)} check method failed.
      * @param other     The {@code CharSequence} provided to the {@link TextParameter#notContained(CharSequence)} check that failed.
      */
-    @Override default void notContainedError(TextParameter parameter, CharSequence other)
+    @Override default void notContainedFailure(TextParameter parameter, CharSequence other)
     {
 
     }

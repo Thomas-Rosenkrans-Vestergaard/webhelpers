@@ -1,167 +1,258 @@
 package tvestergaard.webhelpers.parameters;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.List;
 
 public class IntParameter extends AbstractParameter
 {
 
-    private int                      value;
-    private IntParameterErrorHandler errorHandler;
+    /**
+     * The internal value of the {@link IntParameter}.
+     */
+    private final int value;
 
-    public IntParameter(String name, int value, IntParameterErrorHandler errorHandler)
+    /**
+     * The registered list of {@link IntParameterErrorHandler} instances. These objects are notified when checks in the
+     * {@link TextParameter} fails.
+     */
+    private final List<IntParameterErrorHandler> errorHandlers;
+    private final IntParameterErrorHandler[]     errorHandlersArray;
+    private int errorCount = 0;
+
+    public IntParameter(String name, int value, List<IntParameterErrorHandler> errorHandlers)
     {
         super(name);
         this.value = value;
-        this.errorHandler = errorHandler;
+        this.errorHandlers = errorHandlers;
+        this.errorHandlersArray = errorHandlers.toArray(new IntParameterErrorHandler[errorHandlers.size()]);
     }
 
-    public IntParameter(String name, int value)
+    @FunctionalInterface public interface IsErrorCallback
     {
-        this(name, value, null);
+        boolean isError(IntParameter parameter, int other);
     }
 
-    public boolean is(int other, BiConsumer<IntParameter, Integer> onError)
+    public boolean is(int other, IsErrorCallback... errorCallbacks)
     {
         boolean result = value == other;
-        if (!result)
-            onError.accept(this, other);
+        if (!result) {
+            errorCount++;
+            for (IsErrorCallback errorCallback : errorCallbacks)
+                errorCallback.isError(this, other);
+        }
 
         return result;
     }
 
     public boolean is(int other)
     {
-        return is(other, errorHandler::is);
+        return is(other, errorHandlersArray);
     }
 
-    public boolean not(int other, BiConsumer<IntParameter, Integer> onError)
+    @FunctionalInterface public interface NotErrorCallback
+    {
+        boolean notError(IntParameter parameter, int other);
+    }
+
+    public boolean not(int other, NotErrorCallback... errorCallbacks)
     {
         boolean result = value != other;
-        if (!result)
-            onError.accept(this, other);
+        if (!result) {
+            errorCount++;
+            for (NotErrorCallback errorCallback : errorCallbacks)
+                errorCallback.notError(this, other);
+        }
 
         return result;
     }
 
     public boolean not(int other)
     {
-        return not(other, errorHandler::not);
+        return not(other, errorHandlersArray);
     }
 
-    public boolean isPositive(Consumer<IntParameter> onError)
+    @FunctionalInterface public interface IsPositiveError
+    {
+        boolean isPositiveError(IntParameter parameter);
+    }
+
+    public boolean isPositive(IsPositiveError... errorCallbacks)
     {
         boolean result = value > 0;
-        if (!result)
-            onError.accept(this);
+        if (!result) {
+            errorCount++;
+            for (IsPositiveError errorCallback : errorCallbacks)
+                errorCallback.isPositiveError(this);
+        }
 
         return result;
     }
 
     public boolean isPositive()
     {
-        return isPositive(errorHandler::isPositive);
+        return isPositive(errorHandlersArray);
     }
 
-    public boolean notPositive(Consumer<IntParameter> onError)
+    @FunctionalInterface public interface NotPositiveError
+    {
+        boolean notPositiveError(IntParameter parameter);
+    }
+
+    public boolean notPositive(NotPositiveError... errorCallbacks)
     {
         boolean result = value <= 0;
-        if (!result)
-            onError.accept(this);
+        if (!result) {
+            errorCount++;
+            for (NotPositiveError errorCallback : errorCallbacks)
+                errorCallback.notPositiveError(this);
+        }
 
         return result;
     }
 
     public boolean notPositive()
     {
-        return notPositive(errorHandler::notPositive);
+        return notPositive(errorHandlersArray);
     }
 
-    public boolean isNegative(Consumer<IntParameter> onError)
+    @FunctionalInterface public interface IsNegativeErrorCallback
+    {
+        boolean isNegativeError(IntParameter parameter);
+    }
+
+    public boolean isNegative(IsNegativeErrorCallback... errorCallbacks)
     {
         boolean result = value < 0;
-        if (!result)
-            onError.accept(this);
+        if (!result) {
+            errorCount++;
+            for (IsNegativeErrorCallback errorCallback : errorCallbacks)
+                errorCallback.isNegativeError(this);
+        }
 
         return result;
     }
 
     public boolean isNegative()
     {
-        return isNegative(errorHandler::isNegative);
+        return isNegative(errorHandlersArray);
     }
 
-    public boolean notNegative(Consumer<IntParameter> onError)
+    @FunctionalInterface public interface NotNegativeErrorCallback
+    {
+        boolean notNegativeError(IntParameter parameter);
+    }
+
+    public boolean notNegative(NotNegativeErrorCallback... errorCallbacks)
     {
         boolean result = value >= 0;
-        if (!result)
-            onError.accept(this);
+        if (!result) {
+            errorCount++;
+            for (NotNegativeErrorCallback errorCallback : errorCallbacks)
+                errorCallback.notNegativeError(this);
+        }
 
         return result;
     }
 
     public boolean notNegative()
     {
-        return notNegative(errorHandler::notNegative);
+        return notNegative(errorHandlersArray);
     }
 
-    public boolean isAbove(int lower, BiConsumer<IntParameter, Integer> onError)
+    @FunctionalInterface public interface IsGreaterThanErrorCallback
+    {
+        boolean isGreaterThanError(IntParameter parameter);
+    }
+
+    public boolean isGreaterThan(int lower, IsGreaterThanErrorCallback... errorCallbacks)
     {
         boolean result = value > lower;
-        if (!result)
-            onError.accept(this, lower);
+        if (!result) {
+            errorCount++;
+            for (IsGreaterThanErrorCallback errorCallback : errorCallbacks)
+                errorCallback.isGreaterThanError(this);
+        }
 
         return result;
     }
 
-    public boolean isAbove(int lower)
+    public boolean isGreaterThan(int lower)
     {
-        return isAbove(lower, errorHandler::isAbove);
+        return isGreaterThan(lower, errorHandlersArray);
     }
 
-    public boolean notAbove(int lower, BiConsumer<IntParameter, Integer> onError)
+    @FunctionalInterface public interface NotGreaterThanErrorCallback
+    {
+        boolean notGreaterThanError(IntParameter parameter);
+    }
+
+    public boolean notGreaterThan(int lower, NotGreaterThanErrorCallback... errorCallbacks)
     {
         boolean result = value <= lower;
-        if (!result)
-            onError.accept(this, lower);
+        if (!result) {
+            errorCount++;
+            for (NotGreaterThanErrorCallback errorCallback : errorCallbacks)
+                errorCallback.notGreaterThanError(this);
+        }
 
         return result;
     }
 
-    public boolean notAbove(int lower)
+    public boolean notGreaterThan(int lower)
     {
-        return notAbove(lower, errorHandler::notAbove);
+        return notGreaterThan(lower, errorHandlersArray);
     }
 
-    public boolean isBelow(int upper, BiConsumer<IntParameter, Integer> onError)
+    @FunctionalInterface public interface IsLessThanErrorCallback
+    {
+        boolean isLessThanError(IntParameter parameter);
+    }
+
+    public boolean isLessThan(int upper, IsLessThanErrorCallback... errorCallbacks)
     {
         boolean result = value < upper;
-        if (!result)
-            onError.accept(this, upper);
+        if (!result) {
+            errorCount++;
+            for (IsLessThanErrorCallback errorCallback : errorCallbacks)
+                errorCallback.isLessThanError(this);
+        }
 
         return result;
     }
 
-    public boolean isBelow(int upper)
+    public boolean isLessThan(int upper)
     {
-        return isBelow(upper, errorHandler::isBelow);
+        return isLessThan(upper, errorHandlersArray);
     }
 
-    public boolean notBelow(int upper, BiConsumer<IntParameter, Integer> onError)
+    @FunctionalInterface public interface NotLessThanErrorCallback
+    {
+        boolean notLessThanError(IntParameter parameter);
+    }
+
+
+    public boolean notLessThan(int upper, NotLessThanErrorCallback... errorCallbacks)
     {
         boolean result = value >= upper;
-        if (!result)
-            onError.accept(this, upper);
+        if (!result) {
+            errorCount++;
+            for (NotLessThanErrorCallback errorCallback : errorCallbacks)
+                errorCallback.notLessThanError(this);
+        }
 
         return result;
     }
 
-    public boolean notBelow(int upper)
+    public boolean notLessThan(int upper)
     {
-        return notBelow(upper, errorHandler::notBelow);
+        return notLessThan(upper, errorHandlersArray);
     }
 
-    public boolean isBetween(int lower, int upper, boolean inclusive, QuadConsumer<IntParameter, Integer, Integer, Boolean> onError)
+    @FunctionalInterface public interface IsBetweenErrorCallback
+    {
+        boolean isBetweenError(IntParameter parameter, int lower, int upper, boolean inclusive);
+    }
+
+    public boolean isBetween(int lower, int upper, boolean inclusive, IsBetweenErrorCallback... errorCallbacks)
     {
         boolean result;
 
@@ -170,20 +261,23 @@ public class IntParameter extends AbstractParameter
         else
             result = value > lower && value < upper;
 
-        if (!result)
-            onError.accept(this, lower, upper, inclusive);
+        if (!result) {
+            errorCount++;
+            for (IsBetweenErrorCallback errorCallback : errorCallbacks)
+                errorCallback.isBetweenError(this, lower, upper, inclusive);
+        }
 
         return result;
     }
 
-    public boolean isBetween(int lower, int upper, QuadConsumer<IntParameter, Integer, Integer, Boolean> onError)
+    public boolean isBetween(int lower, int upper, IsBetweenErrorCallback... errorCallbacks)
     {
-        return isBetween(lower, upper, true, onError);
+        return isBetween(lower, upper, true, errorCallbacks);
     }
 
     public boolean isBetween(int lower, int upper, boolean inclusive)
     {
-        return isBetween(lower, upper, inclusive, errorHandler::isBetween);
+        return isBetween(lower, upper, inclusive, errorHandlersArray);
     }
 
     public boolean isBetween(int lower, int upper)
@@ -191,7 +285,12 @@ public class IntParameter extends AbstractParameter
         return isBetween(lower, upper, true);
     }
 
-    public boolean notBetween(int lower, int upper, boolean inclusive, QuadConsumer<IntParameter, Integer, Integer, Boolean> onError)
+    @FunctionalInterface public interface NotBetweenErrorCallback
+    {
+        boolean notBetweenError(IntParameter parameter, int lower, int upper, boolean inclusive);
+    }
+
+    public boolean notBetween(int lower, int upper, boolean inclusive, NotBetweenErrorCallback... errorCallbacks)
     {
         boolean result;
 
@@ -200,20 +299,23 @@ public class IntParameter extends AbstractParameter
         else
             result = value <= lower || value >= upper;
 
-        if (!result)
-            onError.accept(this, lower, upper, inclusive);
+        if (!result) {
+            errorCount++;
+            for (NotBetweenErrorCallback errorCallback : errorCallbacks)
+                errorCallback.notBetweenError(this, lower, upper, inclusive);
+        }
 
         return result;
     }
 
-    public boolean notBetween(int lower, int upper, QuadConsumer<IntParameter, Integer, Integer, Boolean> onError)
+    public boolean notBetween(int lower, int upper, NotBetweenErrorCallback... errorCallbacks)
     {
-        return notBetween(lower, upper, true, onError);
+        return notBetween(lower, upper, true, errorCallbacks);
     }
 
     public boolean notBetween(int lower, int upper, boolean inclusive)
     {
-        return notBetween(lower, upper, inclusive, errorHandler::notBetween);
+        return notBetween(lower, upper, inclusive, errorHandlersArray);
     }
 
     public boolean notBetween(int lower, int upper)
@@ -238,6 +340,6 @@ public class IntParameter extends AbstractParameter
      */
     @Override public int getErrorCount()
     {
-        return 0;
+        return errorCount;
     }
 }

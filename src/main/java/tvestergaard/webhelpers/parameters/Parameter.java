@@ -18,20 +18,20 @@ public interface Parameter
     Object getValue();
 
     /**
-     * Returns the number of errors that occurred while performing checks on this {@link Parameter}.
+     * Returns the number of failures that occurred while performing checks on this {@link Parameter}.
      *
-     * @return The number of errors.
+     * @return The number of failures.
      */
-    int getErrorCount();
+    int getFailureCount();
 
     /**
-     * Returns {@code true} if an error occurred while performing checks in this {@link Parameter}. This operation is
-     * equivalent to {@code getErrorCount() > 0}.
+     * Returns {@code true} if an failure occurred while performing checks in this {@link Parameter}. This operation is
+     * equivalent to {@code getFailureCount() > 0}.
      *
-     * @return {@code true} if an error occurred, {@code false} in all other cases.
+     * @return {@code true} if an failure occurred, {@code false} in all other cases.
      */
-    default boolean hasErrors()
+    default boolean hasFailures()
     {
-        return getErrorCount() > 0;
+        return getFailureCount() > 0;
     }
 }

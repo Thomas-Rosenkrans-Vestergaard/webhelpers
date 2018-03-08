@@ -21,23 +21,23 @@ public class TextParameterTest
     @Test
     public void isConsumer() throws Exception
     {
-        TextParameter                 parameter;
-        TextParameter.IsErrorCallback consumer;
-        CharSequence                  other;
+        TextParameter                   parameter;
+        TextParameter.IsFailureCallback consumer;
+        CharSequence                    other;
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(TextParameter.IsErrorCallback.class);
+        consumer = Mockito.spy(TextParameter.IsFailureCallback.class);
         other = "a";
         assertTrue(parameter.is(other, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).isError(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(0)).isFailure(same(parameter), same(other));
         assertEquals(0, parameter.getErrorCount());
         assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(TextParameter.IsErrorCallback.class);
+        consumer = Mockito.spy(TextParameter.IsFailureCallback.class);
         other = "b";
         assertFalse(parameter.is(other, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).isError(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(1)).isFailure(same(parameter), same(other));
         assertEquals(1, parameter.getErrorCount());
         assertTrue(parameter.hasErrors());
     }
@@ -53,7 +53,7 @@ public class TextParameterTest
         parameter = new TextParameter("name", "a", mock);
         other = "a";
         assertTrue(parameter.is(other));
-        Mockito.verify(mock, Mockito.times(0)).isError(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(0)).isFailure(same(parameter), same(other));
         assertEquals(0, parameter.getErrorCount());
         assertFalse(parameter.hasErrors());
 
@@ -61,7 +61,7 @@ public class TextParameterTest
         parameter = new TextParameter("name", "a", mock);
         other = "b";
         assertFalse(parameter.is(other));
-        Mockito.verify(mock, Mockito.times(1)).isError(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(1)).isFailure(same(parameter), same(other));
         assertEquals(1, parameter.getErrorCount());
         assertTrue(parameter.hasErrors());
     }
