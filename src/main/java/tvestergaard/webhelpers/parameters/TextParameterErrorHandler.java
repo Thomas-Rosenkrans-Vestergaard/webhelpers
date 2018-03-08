@@ -1,181 +1,198 @@
 package tvestergaard.webhelpers.parameters;
 
+
 import java.util.List;
 import java.util.regex.Pattern;
 
-public interface TextParameterErrorHandler
+public interface TextParameterErrorHandler extends TextParameter.IsErrorCallback,
+                                                   TextParameter.NotErrorCallback,
+                                                   TextParameter.IsEmptyErrorCallback,
+                                                   TextParameter.NotEmptyErrorCallback,
+                                                   TextParameter.IsLengthErrorCallback,
+                                                   TextParameter.NotLengthErrorCallback,
+                                                   TextParameter.IsShorterThanErrorCallback,
+                                                   TextParameter.NotShorterThanErrorCallback,
+                                                   TextParameter.IsLongerThanErrorCallback,
+                                                   TextParameter.NotLongerThanErrorCallback,
+                                                   TextParameter.IsMatchErrorCallback,
+                                                   TextParameter.NotMatchErrorCallback,
+                                                   TextParameter.IsInErrorCallback,
+                                                   TextParameter.NotInErrorCallback,
+                                                   TextParameter.IsContainedErrorCallback,
+                                                   TextParameter.NotContainedErrorCallback
 {
 
     /**
-     * Callback for when the {@link TextParameter#is(CharSequence)} method check fails.
+     * The method called when the {@link TextParameter#is(CharSequence)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#is(CharSequence)} method check failed.
-     * @param other     The {@code CharSequence} provided to the {@link TextParameter#is(CharSequence)} check.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#is(CharSequence)} check method failed.
+     * @param other     The {@code CharSequence} provided to the {@link TextParameter#is(CharSequence)}.
      */
-    default void is(TextParameter parameter, CharSequence other)
+    @Override default void isError(TextParameter parameter, CharSequence other)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#not(CharSequence)} method check fails.
+     * The method called when the {@link TextParameter#not(CharSequence)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#not(CharSequence)} method check failed.
-     * @param other     The {@code CharSequence} provided to the {@link TextParameter#not(CharSequence)} check.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#not(CharSequence)} check method failed.
+     * @param other     The {@code CharSequence} provided to the {@link TextParameter#not(CharSequence)}.
      */
-    default void not(TextParameter parameter, CharSequence other)
+    @Override default void notError(TextParameter parameter, CharSequence other)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isEmpty()} method check fails.
+     * The method called when the {@link TextParameter#isEmpty()} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isEmpty()} method check failed.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#isEmpty()} check method failed.
      */
-    default void isEmpty(TextParameter parameter)
+    @Override default void isEmptyError(TextParameter parameter)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notEmpty()} method check fails.
+     * The method called when the {@link TextParameter#notEmpty()} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notEmpty()} method check failed.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#notEmpty()} check method failed.
      */
-    default void notEmpty(TextParameter parameter)
+    @Override default void notEmptyError(TextParameter parameter)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isLength(int)} method check fails.
+     * The method called when the {@link TextParameter#isLength(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isLength(int)} method check failed.
-     * @param check     The length parameter passed to the {@link TextParameter#isLength(int)} check.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#isLength(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#isLength(int)} check that failed.
      */
-    default void isLength(TextParameter parameter, int check)
+    @Override default void isLengthError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notLength(int)} method check fails.
+     * The method called when the {@link TextParameter#notLength(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notLength(int)} method check failed.
-     * @param check     The length parameter provided to the {@link TextParameter#notLength(int)} check.
+     * @param parameter The {@link Parameter} on which the {@link TextParameter#notLength(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#notLength(int)} check that failed.
      */
-    default void notLength(TextParameter parameter, int check)
+    @Override default void notLengthError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isShorterThan(int)} method check fails.
+     * The method called when the {@link TextParameter#isShorterThan(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isShorterThan(int)} method check failed.
-     * @param check     The length parameter provided to the {@link TextParameter#isShorterThan(int)} check.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#isShorterThan(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#isShorterThan(int)} check that failed.
      */
-    default void isShorterThan(TextParameter parameter, int check)
+    @Override default void isShorterThanError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notShorterThan(int)} method check fails.
+     * The method called when the {@link TextParameter#notShorterThan(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notShorterThan(int)} method check failed.
-     * @param check     The length parameter provided to the {@link TextParameter#notShorterThan(int)} check.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#notShorterThan(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#notShorterThan(int)} check that failed.
      */
-    default void notShorterThan(TextParameter parameter, int check)
+    @Override default void notShorterThanError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isLongerThan(int)} method check fails.
+     * The method called when the {@link TextParameter#isLongerThan(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isLongerThan(int)} method check failed.
-     * @param check     The length parameter provided to the {@link TextParameter#isLongerThan(int)} check.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#isLongerThan(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#isLongerThan(int)} check that failed.
      */
-    default void isLongerThan(TextParameter parameter, int check)
+    @Override default void isLongerThanError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notLongerThan(int)} method check fails.
+     * The method called when the {@link TextParameter#notLongerThan(int)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notLongerThan(int)} method check failed.
-     * @param check     The length parameter passed to the {@link TextParameter#notLongerThan(int)} check.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#notLongerThan(int)} check method failed.
+     * @param check     The length provided to the {@link TextParameter#notLongerThan(int)} check that failed.
      */
-    default void notLongerThan(TextParameter parameter, int check)
+    @Override default void notLongerThanError(TextParameter parameter, int check)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isMatch(Pattern)} method check fails.
+     * The method called when the {@link TextParameter#isMatch(Pattern)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isMatch(Pattern)} method check failed.
-     * @param pattern   The {@code Pattern} provided to the {@link TextParameter#isMatch(Pattern)} check.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#isMatch(Pattern)} check method failed.
+     * @param pattern   The {@code Pattern} provided to the {@link TextParameter#isMatch(Pattern)} check that failed.
      */
-    default void isMatch(TextParameter parameter, Pattern pattern)
+    @Override default void isMatchError(TextParameter parameter, Pattern pattern)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notEmpty()} method check fails.
+     * The method called when the {@link TextParameter#notMatch(Pattern)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notEmpty()} method check failed.
-     * @param pattern   The {@code Pattern} provided to the {@link TextParameter#notMatch(Pattern)}.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#notMatch(Pattern)} check method failed.
+     * @param pattern   The {@code Pattern} provided to the {@link TextParameter#notMatch(Pattern)} check that failed.
      */
-    default void notMatch(TextParameter parameter, Pattern pattern)
+    @Override default void notMatchError(TextParameter parameter, Pattern pattern)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#isIn(List)} method check fails.
+     * The method called when the {@link TextParameter#isIn(List)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#isIn(List)} method check failed.
-     * @param others    The list of {@code CharSequence} instances provided to the {@link TextParameter#isIn(List)}.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#isIn(List)} check method failed.
+     * @param patterns  The list of {@code CharSequence} instances provided to the {@link TextParameter#isIn(List)} check that failed.
      */
-    default void isIn(TextParameter parameter, List<? extends CharSequence> others)
+    @Override default void isInError(TextParameter parameter, List<? extends CharSequence> patterns)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notIn(List)} method check fails.
+     * The method called when the {@link TextParameter#notIn(List)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notIn(List)} method check failed.
-     * @param others    The list of {@code CharSequence} instances provided to the {@link TextParameter#notIn(List)}.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#notIn(List)} check method failed.
+     * @param patterns  The list of {@code CharSequence} instances provided to the {@link TextParameter#notIn(List)} check that failed.
+     * @param collision The index of the {@code CharSequence} in the provided list that caused the check to fail.
      */
-    default void notIn(TextParameter parameter, List<? extends CharSequence> others, int collision)
+    @Override default void notInError(TextParameter parameter, List<? extends CharSequence> patterns, int collision)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#contains(CharSequence)} method check fails.
+     * The method called when the {@link TextParameter#isContained(CharSequence)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#contains(CharSequence)} method check failed.
-     * @param other     The {@code CharSequence} provided to the {@link TextParameter#contains(CharSequence)}.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#isContained(CharSequence)} check method failed.
+     * @param other     The {@code CharSequence} provided to the {@link TextParameter#isContained(CharSequence)} check that failed.
      */
-    default void contains(TextParameter parameter, CharSequence other)
+    @Override default void isContainedError(TextParameter parameter, CharSequence other)
     {
 
     }
 
     /**
-     * Callback for when the {@link TextParameter#notContains(CharSequence)} method check fails.
+     * The method called when the {@link TextParameter#notContained(CharSequence)} check method fails.
      *
-     * @param parameter The instance of {@link TextParameter} on which the {@link TextParameter#notContains(CharSequence)} method check failed.
-     * @param other     The {@code CharSequence} provided to the {@link TextParameter#notContains(CharSequence)}.
+     * @param parameter The {@link TextParameter} on which the {@link TextParameter#notContained(CharSequence)} check method failed.
+     * @param other     The {@code CharSequence} provided to the {@link TextParameter#notContained(CharSequence)} check that failed.
      */
-    default void notContains(TextParameter parameter, CharSequence other)
+    @Override default void notContainedError(TextParameter parameter, CharSequence other)
     {
 
     }

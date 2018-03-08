@@ -39,4 +39,12 @@ public class ErrorHandlerList<T> implements Iterable<T>
     {
         return errorHandlers.iterator();
     }
+
+    public <A> A[] toArray(A[] array)
+    {
+        for(int x = 0; x < array.length && x <size(); x++)
+            array[x] = (A) errorHandlers.get(x);
+
+        return array;
+    }
 }

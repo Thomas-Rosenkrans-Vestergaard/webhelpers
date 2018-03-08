@@ -5,8 +5,6 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -23,21 +21,25 @@ public class TextParameterTest
     @Test
     public void isConsumer() throws Exception
     {
-        TextParameter                           parameter;
-        BiConsumer<TextParameter, CharSequence> consumer;
-        CharSequence                            other;
+        TextParameter                 parameter;
+        TextParameter.IsErrorCallback consumer;
+        CharSequence                  other;
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsErrorCallback.class);
         other = "a";
         assertTrue(parameter.is(other, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(0)).isError(same(parameter), same(other));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsErrorCallback.class);
         other = "b";
         assertFalse(parameter.is(other, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(1)).isError(same(parameter), same(other));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -51,33 +53,41 @@ public class TextParameterTest
         parameter = new TextParameter("name", "a", mock);
         other = "a";
         assertTrue(parameter.is(other));
-        Mockito.verify(mock, Mockito.times(0)).is(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(0)).isError(same(parameter), same(other));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "a", mock);
         other = "b";
         assertFalse(parameter.is(other));
-        Mockito.verify(mock, Mockito.times(1)).is(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(1)).isError(same(parameter), same(other));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notConsumer() throws Exception
     {
-        TextParameter                           parameter;
-        BiConsumer<TextParameter, CharSequence> consumer;
-        CharSequence                            other;
+        TextParameter                  parameter;
+        TextParameter.NotErrorCallback consumer;
+        CharSequence                   other;
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotErrorCallback.class);
         other = "b";
         assertTrue(parameter.not(other, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(0)).notError(same(parameter), same(other));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "a");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotErrorCallback.class);
         other = "a";
         assertFalse(parameter.not(other, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(other));
+        Mockito.verify(consumer, Mockito.times(1)).notError(same(parameter), same(other));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -91,30 +101,38 @@ public class TextParameterTest
         parameter = new TextParameter("name", "a", mock);
         other = "b";
         assertTrue(parameter.not(other));
-        Mockito.verify(mock, Mockito.times(0)).not(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(0)).notError(same(parameter), same(other));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "a", mock);
         other = "a";
         assertFalse(parameter.not(other));
-        Mockito.verify(mock, Mockito.times(1)).not(same(parameter), same(other));
+        Mockito.verify(mock, Mockito.times(1)).notError(same(parameter), same(other));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isEmptyConsumer() throws Exception
     {
-        TextParameter           parameter;
-        Consumer<TextParameter> consumer;
+        TextParameter                      parameter;
+        TextParameter.IsEmptyErrorCallback consumer;
 
         parameter = new TextParameter("name", "");
-        consumer = Mockito.spy(Consumer.class);
+        consumer = Mockito.spy(TextParameter.IsEmptyErrorCallback.class);
         assertTrue(parameter.isEmpty(consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter));
+        Mockito.verify(consumer, Mockito.times(0)).isEmptyError(same(parameter));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(Consumer.class);
+        consumer = Mockito.spy(TextParameter.IsEmptyErrorCallback.class);
         assertFalse(parameter.isEmpty(consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter));
+        Mockito.verify(consumer, Mockito.times(1)).isEmptyError(same(parameter));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -126,29 +144,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "", mock);
         assertTrue(parameter.isEmpty());
-        Mockito.verify(mock, Mockito.times(0)).isEmpty(same(parameter));
+        Mockito.verify(mock, Mockito.times(0)).isEmptyError(same(parameter));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.isEmpty());
-        Mockito.verify(mock, Mockito.times(1)).isEmpty(same(parameter));
+        Mockito.verify(mock, Mockito.times(1)).isEmptyError(same(parameter));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notEmptyConsumer() throws Exception
     {
-        TextParameter           parameter;
-        Consumer<TextParameter> consumer;
+        TextParameter                       parameter;
+        TextParameter.NotEmptyErrorCallback consumer;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(Consumer.class);
+        consumer = Mockito.spy(TextParameter.NotEmptyErrorCallback.class);
         assertTrue(parameter.notEmpty(consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter));
+        Mockito.verify(consumer, Mockito.times(0)).notEmptyError(same(parameter));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "");
-        consumer = Mockito.spy(Consumer.class);
+        consumer = Mockito.spy(TextParameter.NotEmptyErrorCallback.class);
         assertFalse(parameter.notEmpty(consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter));
+        Mockito.verify(consumer, Mockito.times(1)).notEmptyError(same(parameter));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -160,29 +186,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertTrue(parameter.notEmpty());
-        Mockito.verify(mock, Mockito.times(0)).notEmpty(same(parameter));
+        Mockito.verify(mock, Mockito.times(0)).notEmptyError(same(parameter));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "", mock);
         assertFalse(parameter.notEmpty());
-        Mockito.verify(mock, Mockito.times(1)).notEmpty(same(parameter));
+        Mockito.verify(mock, Mockito.times(1)).notEmptyError(same(parameter));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isLengthConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                       parameter;
+        TextParameter.IsLengthErrorCallback consumer;
 
         parameter = new TextParameter("name", "");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsLengthErrorCallback.class);
         assertTrue(parameter.isLength(0, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        Mockito.verify(consumer, Mockito.times(0)).isLengthError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsLengthErrorCallback.class);
         assertFalse(parameter.isLength(6, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(6));
+        Mockito.verify(consumer, Mockito.times(1)).isLengthError(same(parameter), eq(6));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -194,32 +228,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "", mock);
         assertTrue(parameter.isLength(0));
-        Mockito.verify(mock, Mockito.times(0)).isLength(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).isLengthError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.isLength(1));
-        Mockito.verify(mock, Mockito.times(1)).isLength(same(parameter), eq(1));
+        Mockito.verify(mock, Mockito.times(1)).isLengthError(same(parameter), eq(1));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notLengthConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                        parameter;
+        TextParameter.NotLengthErrorCallback consumer;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotLengthErrorCallback.class);
         assertTrue(parameter.notLength(0, consumer));
-        assertTrue(parameter.notLength(1, consumer));
-        assertTrue(parameter.notLength(4, consumer));
-        assertTrue(parameter.notLength(6, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        Mockito.verify(consumer, Mockito.times(0)).notLengthError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotLengthErrorCallback.class);
         assertFalse(parameter.notLength(5, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(5));
+        Mockito.verify(consumer, Mockito.times(1)).notLengthError(same(parameter), eq(5));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -234,31 +273,39 @@ public class TextParameterTest
         assertTrue(parameter.notLength(1));
         assertTrue(parameter.notLength(4));
         assertTrue(parameter.notLength(6));
-        Mockito.verify(mock, Mockito.times(0)).notLength(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).notLengthError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.notLength(5));
-        Mockito.verify(mock, Mockito.times(1)).notLength(same(parameter), eq(5));
+        Mockito.verify(mock, Mockito.times(1)).notLengthError(same(parameter), eq(5));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isShorterConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                            parameter;
+        TextParameter.IsShorterThanErrorCallback consumer;
 
         parameter = new TextParameter("name", "");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsShorterThanErrorCallback.class);
         assertTrue(parameter.isShorterThan(1, consumer));
         assertTrue(parameter.isShorterThan(2, consumer));
         assertTrue(parameter.isShorterThan(10, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        Mockito.verify(consumer, Mockito.times(0)).isShorterThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsShorterThanErrorCallback.class);
         assertFalse(parameter.isShorterThan(0, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(0));
+        Mockito.verify(consumer, Mockito.times(1)).isShorterThanError(same(parameter), eq(0));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -270,29 +317,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "", mock);
         assertTrue(parameter.isShorterThan(1));
-        Mockito.verify(mock, Mockito.times(0)).isShorterThan(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).isShorterThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.isShorterThan(0));
-        Mockito.verify(mock, Mockito.times(1)).isShorterThan(same(parameter), eq(0));
+        Mockito.verify(mock, Mockito.times(1)).isShorterThanError(same(parameter), eq(0));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notShorterThanConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                             parameter;
+        TextParameter.NotShorterThanErrorCallback consumer;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
-        assertTrue(parameter.notShorterThan(1));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        consumer = Mockito.spy(TextParameter.NotShorterThanErrorCallback.class);
+        assertTrue(parameter.notShorterThan(1, consumer));
+        Mockito.verify(consumer, Mockito.times(0)).notShorterThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
-        assertFalse(parameter.isShorterThan(5, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(5));
+        consumer = Mockito.spy(TextParameter.NotShorterThanErrorCallback.class);
+        assertFalse(parameter.notShorterThan(6, consumer));
+        Mockito.verify(consumer, Mockito.times(1)).notShorterThanError(same(parameter), eq(6));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -304,29 +359,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertTrue(parameter.notShorterThan(1));
-        Mockito.verify(mock, Mockito.times(0)).notShorterThan(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).notShorterThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.notShorterThan(7));
-        Mockito.verify(mock, Mockito.times(1)).notShorterThan(same(parameter), eq(7));
+        Mockito.verify(mock, Mockito.times(1)).notShorterThanError(same(parameter), eq(7));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isLongerThanConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                           parameter;
+        TextParameter.IsLongerThanErrorCallback consumer;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
-        assertTrue(parameter.isLongerThan(1));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        consumer = Mockito.spy(TextParameter.IsLongerThanErrorCallback.class);
+        assertTrue(parameter.isLongerThan(1, consumer));
+        Mockito.verify(consumer, Mockito.times(0)).isLongerThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsLongerThanErrorCallback.class);
         assertFalse(parameter.isLongerThan(6, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(6));
+        Mockito.verify(consumer, Mockito.times(1)).isLongerThanError(same(parameter), eq(6));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -338,29 +401,37 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertTrue(parameter.isLongerThan(1));
-        Mockito.verify(mock, Mockito.times(0)).isLongerThan(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).isLongerThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.isLongerThan(7));
-        Mockito.verify(mock, Mockito.times(1)).isLongerThan(same(parameter), eq(7));
+        Mockito.verify(mock, Mockito.times(1)).isLongerThanError(same(parameter), eq(7));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notLongerThanConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Integer> consumer;
+        TextParameter                            parameter;
+        TextParameter.NotLongerThanErrorCallback consumer;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
-        assertTrue(parameter.notLongerThan(6));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), any(Integer.class));
+        consumer = Mockito.spy(TextParameter.NotLongerThanErrorCallback.class);
+        assertTrue(parameter.notLongerThan(6, consumer));
+        Mockito.verify(consumer, Mockito.times(0)).notLongerThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotLongerThanErrorCallback.class);
         assertFalse(parameter.notLongerThan(4, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), eq(4));
+        Mockito.verify(consumer, Mockito.times(1)).notLongerThanError(same(parameter), eq(4));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -372,32 +443,40 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertTrue(parameter.notLongerThan(6));
-        Mockito.verify(mock, Mockito.times(0)).notLongerThan(same(parameter), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).notLongerThanError(same(parameter), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         assertFalse(parameter.notLongerThan(4));
-        Mockito.verify(mock, Mockito.times(1)).notLongerThan(same(parameter), eq(4));
+        Mockito.verify(mock, Mockito.times(1)).notLongerThanError(same(parameter), eq(4));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isMatchConsumer() throws Exception
     {
         TextParameter                      parameter;
-        BiConsumer<TextParameter, Pattern> consumer;
+        TextParameter.IsMatchErrorCallback consumer;
         Pattern                            pattern;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsMatchErrorCallback.class);
         pattern = Pattern.compile("^val");
         assertTrue(parameter.isMatch(pattern, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(pattern));
+        Mockito.verify(consumer, Mockito.times(0)).isMatchError(same(parameter), same(pattern));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsMatchErrorCallback.class);
         pattern = Pattern.compile("^$");
         assertFalse(parameter.isMatch(pattern, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(pattern));
+        Mockito.verify(consumer, Mockito.times(1)).isMatchError(same(parameter), same(pattern));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -411,33 +490,41 @@ public class TextParameterTest
         parameter = new TextParameter("name", "value", mock);
         pattern = Pattern.compile("^val");
         assertTrue(parameter.isMatch(pattern));
-        Mockito.verify(mock, Mockito.times(0)).isMatch(same(parameter), same(pattern));
+        Mockito.verify(mock, Mockito.times(0)).isMatchError(same(parameter), same(pattern));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         pattern = Pattern.compile("^$");
         assertFalse(parameter.isMatch(pattern));
-        Mockito.verify(mock, Mockito.times(1)).isMatch(same(parameter), same(pattern));
+        Mockito.verify(mock, Mockito.times(1)).isMatchError(same(parameter), same(pattern));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notMatchConsumer() throws Exception
     {
-        TextParameter                      parameter;
-        BiConsumer<TextParameter, Pattern> consumer;
-        Pattern                            pattern;
+        TextParameter                       parameter;
+        TextParameter.NotMatchErrorCallback consumer;
+        Pattern                             pattern;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotMatchErrorCallback.class);
         pattern = Pattern.compile("^$");
         assertTrue(parameter.notMatch(pattern, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(pattern));
+        Mockito.verify(consumer, Mockito.times(0)).notMatchError(same(parameter), same(pattern));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotMatchErrorCallback.class);
         pattern = Pattern.compile("^val");
         assertFalse(parameter.notMatch(pattern, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(pattern));
+        Mockito.verify(consumer, Mockito.times(1)).notMatchError(same(parameter), same(pattern));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -451,33 +538,41 @@ public class TextParameterTest
         parameter = new TextParameter("name", "value", mock);
         pattern = Pattern.compile("^$");
         assertTrue(parameter.notMatch(pattern));
-        Mockito.verify(mock, Mockito.times(0)).notMatch(same(parameter), same(pattern));
+        Mockito.verify(mock, Mockito.times(0)).notMatchError(same(parameter), same(pattern));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         pattern = Pattern.compile("^val");
         assertFalse(parameter.notMatch(pattern));
-        Mockito.verify(mock, Mockito.times(1)).notMatch(same(parameter), same(pattern));
+        Mockito.verify(mock, Mockito.times(1)).notMatchError(same(parameter), same(pattern));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void isInConsumer() throws Exception
     {
-        TextParameter                                           parameter;
-        BiConsumer<TextParameter, List<? extends CharSequence>> consumer;
-        List<String>                                            list;
+        TextParameter                   parameter;
+        TextParameter.IsInErrorCallback consumer;
+        List<String>                    list;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsInErrorCallback.class);
         list = list("a", "b", "value");
         assertTrue(parameter.isIn(list, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(list));
+        Mockito.verify(consumer, Mockito.times(0)).isInError(same(parameter), same(list));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsInErrorCallback.class);
         list = list("a", "b");
         assertFalse(parameter.isIn(list, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(list));
+        Mockito.verify(consumer, Mockito.times(1)).isInError(same(parameter), same(list));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -491,33 +586,41 @@ public class TextParameterTest
         parameter = new TextParameter("name", "value", mock);
         list = list("a", "b", "value");
         assertTrue(parameter.isIn(list));
-        Mockito.verify(mock, Mockito.times(0)).isIn(same(parameter), same(list));
+        Mockito.verify(mock, Mockito.times(0)).isInError(same(parameter), same(list));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         list = list("a", "b");
         assertFalse(parameter.isIn(list));
-        Mockito.verify(mock, Mockito.times(1)).isIn(same(parameter), same(list));
+        Mockito.verify(mock, Mockito.times(1)).isInError(same(parameter), same(list));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notInConsumer() throws Exception
     {
-        TextParameter                                                     parameter;
-        TriConsumer<TextParameter, List<? extends CharSequence>, Integer> consumer;
-        List<String>                                                      list;
+        TextParameter                    parameter;
+        TextParameter.NotInErrorCallback consumer;
+        List<String>                     list;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(TriConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotInErrorCallback.class);
         list = list("a", "b");
         assertTrue(parameter.notIn(list, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(list), any(Integer.class));
+        Mockito.verify(consumer, Mockito.times(0)).notInError(same(parameter), same(list), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(TriConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotInErrorCallback.class);
         list = list("a", "b", "value");
         assertFalse(parameter.notIn(list, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(list), eq(2));
+        Mockito.verify(consumer, Mockito.times(1)).notInError(same(parameter), same(list), eq(2));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -531,33 +634,41 @@ public class TextParameterTest
         parameter = new TextParameter("name", "value", mock);
         list = list("a", "b");
         assertTrue(parameter.notIn(list));
-        Mockito.verify(mock, Mockito.times(0)).notIn(same(parameter), same(list), any(Integer.class));
+        Mockito.verify(mock, Mockito.times(0)).notInError(same(parameter), same(list), any(Integer.class));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         list = list("a", "b", "value");
         assertFalse(parameter.notIn(list));
-        Mockito.verify(mock, Mockito.times(1)).notIn(same(parameter), same(list), eq(2));
+        Mockito.verify(mock, Mockito.times(1)).notInError(same(parameter), same(list), eq(2));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void containsConsumer() throws Exception
     {
-        TextParameter                           parameter;
-        BiConsumer<TextParameter, CharSequence> consumer;
-        String                                  sub;
+        TextParameter                          parameter;
+        TextParameter.IsContainedErrorCallback consumer;
+        String                                 sub;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsContainedErrorCallback.class);
         sub = "val";
-        assertTrue(parameter.contains(sub, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(sub));
+        assertTrue(parameter.isContained(sub, consumer));
+        Mockito.verify(consumer, Mockito.times(0)).isContainedError(same(parameter), same(sub));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.IsContainedErrorCallback.class);
         sub = "value2";
-        assertFalse(parameter.contains(sub, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(sub));
+        assertFalse(parameter.isContained(sub, consumer));
+        Mockito.verify(consumer, Mockito.times(1)).isContainedError(same(parameter), same(sub));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -570,34 +681,42 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         sub = "val";
-        assertTrue(parameter.contains(sub));
-        Mockito.verify(mock, Mockito.times(0)).contains(same(parameter), same(sub));
+        assertTrue(parameter.isContained(sub));
+        Mockito.verify(mock, Mockito.times(0)).isContainedError(same(parameter), same(sub));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         sub = "value2";
-        assertFalse(parameter.contains(sub));
-        Mockito.verify(mock, Mockito.times(1)).contains(same(parameter), same(sub));
+        assertFalse(parameter.isContained(sub));
+        Mockito.verify(mock, Mockito.times(1)).isContainedError(same(parameter), same(sub));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
     public void notContainsConsumer() throws Exception
     {
         TextParameter                           parameter;
-        BiConsumer<TextParameter, CharSequence> consumer;
+        TextParameter.NotContainedErrorCallback consumer;
         String                                  sub;
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotContainedErrorCallback.class);
         sub = "value2";
-        assertTrue(parameter.notContains(sub, consumer));
-        Mockito.verify(consumer, Mockito.times(0)).accept(same(parameter), same(sub));
+        assertTrue(parameter.notContained(sub, consumer));
+        Mockito.verify(consumer, Mockito.times(0)).notContainedError(same(parameter), same(sub));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         parameter = new TextParameter("name", "value");
-        consumer = Mockito.spy(BiConsumer.class);
+        consumer = Mockito.spy(TextParameter.NotContainedErrorCallback.class);
         sub = "val";
-        assertFalse(parameter.notContains(sub, consumer));
-        Mockito.verify(consumer, Mockito.times(1)).accept(same(parameter), same(sub));
+        assertFalse(parameter.notContained(sub, consumer));
+        Mockito.verify(consumer, Mockito.times(1)).notContainedError(same(parameter), same(sub));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test
@@ -610,14 +729,18 @@ public class TextParameterTest
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         sub = "value2";
-        assertTrue(parameter.notContains(sub));
-        Mockito.verify(mock, Mockito.times(0)).notContains(same(parameter), same(sub));
+        assertTrue(parameter.notContained(sub));
+        Mockito.verify(mock, Mockito.times(0)).notContainedError(same(parameter), same(sub));
+        assertEquals(0, parameter.getErrorCount());
+        assertFalse(parameter.hasErrors());
 
         mock = Mockito.spy(errorHandler);
         parameter = new TextParameter("name", "value", mock);
         sub = "val";
-        assertFalse(parameter.notContains(sub));
-        Mockito.verify(mock, Mockito.times(1)).notContains(same(parameter), same(sub));
+        assertFalse(parameter.notContained(sub));
+        Mockito.verify(mock, Mockito.times(1)).notContainedError(same(parameter), same(sub));
+        assertEquals(1, parameter.getErrorCount());
+        assertTrue(parameter.hasErrors());
     }
 
     @Test

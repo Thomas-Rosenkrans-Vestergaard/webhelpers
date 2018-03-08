@@ -230,4 +230,14 @@ public class IntParameter extends AbstractParameter
     {
         return value;
     }
+
+    /**
+     * Returns the number of errors that occurred while performing checks on this {@link Parameter}.
+     *
+     * @return The number of errors.
+     */
+    @Override public int getErrorCount()
+    {
+        return 0;
+    }
 }

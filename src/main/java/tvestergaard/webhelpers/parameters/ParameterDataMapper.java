@@ -11,19 +11,19 @@ public interface ParameterDataMapper
      *
      * @param parameterName The name of the parameter to return the associated value of.
      * @return The value associated with the provided {@code parameterName}. Returns {@code null} if the {@code
-     * FormDataMapper} contains no mapping for the provided {@code parameterName}.
+     * FormDataMapper} isContained no mapping for the provided {@code parameterName}.
      */
     String get(String parameterName);
 
     /**
-     * Returns {@code true} if the {@link ParameterDataMapper} contains the provided a value for the provided {@code
+     * Returns {@code true} if the {@link ParameterDataMapper} isContained the provided a value for the provided {@code
      * parameterName}.
      * <p>
      * The method must not return {@code true} if the value associated with the provided {@code parameterName} equals
      * {@code null}.
      *
      * @param parameterName The parameterName to check for in the {@link ParameterDataMapper}.
-     * @return {@code true} if the {@link ParameterDataMapper} contains the provided a value for the provided
+     * @return {@code true} if the {@link ParameterDataMapper} isContained the provided a value for the provided
      * {@code parameterName}.
      */
     boolean has(String parameterName);

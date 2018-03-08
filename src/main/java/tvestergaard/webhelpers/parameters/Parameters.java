@@ -31,7 +31,7 @@ public class Parameters
     /**
      * Creates a new {@link Parameters} for an incoming {@code HttpServletRequest}.
      *
-     * @param request The
+     * @param request The {@code HttpServletRequest} to create an instance of {@link Parameters} for.
      */
     public Parameters(HttpServletRequest request)
     {
@@ -39,10 +39,10 @@ public class Parameters
     }
 
     /**
-     * Returns {@code true} if the form contains a mapping from the provided {@code key}.
+     * Returns {@code true} if the form isContained a mapping from the provided {@code key}.
      *
      * @param key The key to check for.
-     * @return {@code true} if the {@link Parameters} contains a mapping from the provided {@code key}, {@code false} in all other cases.
+     * @return {@code true} if the {@link Parameters} isContained a mapping from the provided {@code key}, {@code false} in all other cases.
      */
     public boolean has(String key)
     {
@@ -90,12 +90,10 @@ public class Parameters
 
     public boolean checkText(String key, ErrorHandlerList<TextParameterErrorHandler> errorHandlers, Consumer<TextParameter> consumer)
     {
-        TextParameterErrorCounter counter = new TextParameterErrorCounter();
-        errorHandlers.add(counter);
         TextParameter textParameter = getText(key, errorHandlers);
         consumer.accept(textParameter);
 
-        return counter.getCount() == 0;
+        return !textParameter.hasErrors();
     }
 
     public boolean checkText(String key, TextParameterErrorHandler errorHandler, Consumer<TextParameter> consumer)
