@@ -1,4 +1,4 @@
-package tvestergaard.webhelpers.parameters.tomcat;
+package tvestergaard.webhelpers.parameters.adapters;
 
 import tvestergaard.webhelpers.parameters.ParameterDataMapper;
 import tvestergaard.webhelpers.parameters.Parameters;

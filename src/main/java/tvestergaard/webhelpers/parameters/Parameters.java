@@ -1,8 +1,7 @@
 package tvestergaard.webhelpers.parameters;
 
-import tvestergaard.webhelpers.parameters.tomcat.HttpServletRequestDataMapper;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class Parameters
@@ -14,28 +13,24 @@ public class Parameters
     private ParameterDataMapper mapper;
 
     /**
-     * The {@link ParametersErrorHandler} that provides error handlers for the {@link Parameter} instances created by this.
+     * The {@link ParametersFailureHandler} that provides error handlers for the {@link Parameter} instances created by this.
      */
-    private ParametersErrorHandler errorHandler;
+    private ParametersFailureHandler failureHandler;
 
     /**
      * Creates a new {@link Parameters}.
      *
      * @param dataMapper The {@link ParameterDataMapper} providing the data in the form.
      */
-    public Parameters(ParameterDataMapper dataMapper)
+    public Parameters(ParameterDataMapper dataMapper, ParametersFailureHandler failureHandler)
     {
         this.mapper = dataMapper;
+        this.failureHandler = failureHandler;
     }
 
-    /**
-     * Creates a new {@link Parameters} for an incoming {@code HttpServletRequest}.
-     *
-     * @param request The {@code HttpServletRequest} to create an instance of {@link Parameters} for.
-     */
-    public Parameters(HttpServletRequest request)
+    public Parameters(ParameterDataMapper dataMapper)
     {
-        this(new HttpServletRequestDataMapper(request));
+        this(dataMapper, ParametersFailureHandler.EMPTY_FAILURE_HANDLER);
     }
 
     /**
@@ -65,7 +60,7 @@ public class Parameters
         return mapper.has(key);
     }
 
-    public TextParameter getText(String key, ErrorHandlerList<TextParameterErrorHandler> errorHandler)
+    public TextParameter getText(String key, List<TextParameterFailureHandler> errorHandler)
     {
         if (mapper.has(key))
             return new TextParameter(key, mapper.get(key), errorHandler);
@@ -85,24 +80,24 @@ public class Parameters
      */
     public TextParameter getText(String key) throws InputConversionException
     {
-        return getText(key, new ErrorHandlerList<>(errorHandler.getTextErrorHandler()));
+        return getText(key, Arrays.asList(failureHandler.getTextFailureHandler()));
     }
 
-    public boolean checkText(String key, ErrorHandlerList<TextParameterErrorHandler> errorHandlers, Consumer<TextParameter> consumer)
+    public boolean checkText(String key, List<TextParameterFailureHandler> errorHandlers, Consumer<TextParameter> consumer)
     {
         TextParameter textParameter = getText(key, errorHandlers);
         consumer.accept(textParameter);
 
-        return !textParameter.hasErrors();
+        return !textParameter.hasFailures();
     }
 
-    public boolean checkText(String key, TextParameterErrorHandler errorHandler, Consumer<TextParameter> consumer)
+    public boolean checkText(String key, TextParameterFailureHandler errorHandler, Consumer<TextParameter> consumer)
     {
-        return checkText(key, new ErrorHandlerList<>(errorHandler), consumer);
+        return checkText(key, Arrays.asList(errorHandler), consumer);
     }
 
     public boolean checkText(String key, Consumer<TextParameter> consumer)
     {
-        return checkText(key, errorHandler.getTextErrorHandler(), consumer);
+        return checkText(key, failureHandler.getTextFailureHandler(), consumer);
     }
 }

@@ -28,7 +28,7 @@ public class TextParameter extends AbstractParameter
     /**
      * An array containing the {@link TextParameterFailureHandler} instances that must be notified of validation failures.
      */
-    private final TextParameterFailureHandler[] failureHandlersArray;
+    private final TextParameterFailureHandler[] failureHandlerArray;
 
     /**
      * The number of failures that occurred while performing checks.
@@ -49,7 +49,7 @@ public class TextParameter extends AbstractParameter
         this.value = value;
         this.length = value.length();
         this.failureHandlers = failureHandler;
-        this.failureHandlersArray = this.failureHandlers.toArray(new TextParameterFailureHandler[this.failureHandlers.size()]);
+        this.failureHandlerArray = this.failureHandlers.toArray(new TextParameterFailureHandler[this.failureHandlers.size()]);
     }
 
     /**
@@ -126,7 +126,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean is(CharSequence other)
     {
-        return is(other, failureHandlersArray);
+        return is(other, failureHandlerArray);
     }
 
     /**
@@ -178,7 +178,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean not(CharSequence other)
     {
-        return not(other, failureHandlersArray);
+        return not(other, failureHandlerArray);
     }
 
     /**
@@ -227,7 +227,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isEmpty()
     {
-        return isEmpty(failureHandlersArray);
+        return isEmpty(failureHandlerArray);
     }
 
     /**
@@ -277,7 +277,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notEmpty()
     {
-        return notEmpty(failureHandlersArray);
+        return notEmpty(failureHandlerArray);
     }
 
     /**
@@ -329,7 +329,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isLength(int n)
     {
-        return isLength(n, failureHandlersArray);
+        return isLength(n, failureHandlerArray);
     }
 
     /**
@@ -381,7 +381,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notLength(int n)
     {
-        return notLength(n, failureHandlersArray);
+        return notLength(n, failureHandlerArray);
     }
 
     /**
@@ -433,7 +433,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isShorterThan(int n)
     {
-        return isShorterThan(n, failureHandlersArray);
+        return isShorterThan(n, failureHandlerArray);
     }
 
     /**
@@ -485,7 +485,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notShorterThan(int n)
     {
-        return notShorterThan(n, failureHandlersArray);
+        return notShorterThan(n, failureHandlerArray);
     }
 
     /**
@@ -537,7 +537,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isLongerThan(int n)
     {
-        return isLongerThan(n, failureHandlersArray);
+        return isLongerThan(n, failureHandlerArray);
     }
 
     /**
@@ -589,7 +589,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notLongerThan(int n)
     {
-        return notLongerThan(n, failureHandlersArray);
+        return notLongerThan(n, failureHandlerArray);
     }
 
     /**
@@ -641,7 +641,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isMatch(Pattern pattern)
     {
-        return isMatch(pattern, failureHandlersArray);
+        return isMatch(pattern, failureHandlerArray);
     }
 
     /**
@@ -693,7 +693,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notMatch(Pattern pattern)
     {
-        return notMatch(pattern, failureHandlersArray);
+        return notMatch(pattern, failureHandlerArray);
     }
 
     /**
@@ -747,7 +747,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isIn(List<? extends CharSequence> patterns)
     {
-        return isIn(patterns, failureHandlersArray);
+        return isIn(patterns, failureHandlerArray);
     }
 
     /**
@@ -803,7 +803,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notIn(List<? extends CharSequence> patterns)
     {
-        return notIn(patterns, failureHandlersArray);
+        return notIn(patterns, failureHandlerArray);
     }
 
     /**
@@ -855,7 +855,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean isContained(CharSequence other)
     {
-        return isContained(other, failureHandlersArray);
+        return isContained(other, failureHandlerArray);
     }
 
     /**
@@ -907,7 +907,7 @@ public class TextParameter extends AbstractParameter
      */
     public boolean notContained(CharSequence other)
     {
-        return notContained(other, failureHandlersArray);
+        return notContained(other, failureHandlerArray);
     }
 
     /**

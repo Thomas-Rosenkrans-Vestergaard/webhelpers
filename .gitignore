@@ -1,3 +1,4 @@
+/docs
 
 # Created by https://www.gitignore.io/api/java,gradle,intellij
 
@@ -108,3 +109,4 @@ gradle-app.setting
 
 
 # End of https://www.gitignore.io/api/java,gradle,intellij
+.idea/inspectionProfiles/
