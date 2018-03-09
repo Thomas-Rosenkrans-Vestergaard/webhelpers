@@ -159,7 +159,7 @@ public class IntParameter extends AbstractParameter
          *
          * @param parameter The {@link IntParameter} instance on which the {@code isPositive} check failed.
          */
-        boolean isPositiveFailure(IntParameter parameter);
+        void isPositiveFailure(IntParameter parameter);
     }
 
     /**
@@ -207,7 +207,7 @@ public class IntParameter extends AbstractParameter
          *
          * @param parameter The {@link IntParameter} instance on which the {@code notPositive} check failed.
          */
-        boolean notPositiveError(IntParameter parameter);
+        void notPositiveFailure(IntParameter parameter);
     }
 
     /**
@@ -222,7 +222,7 @@ public class IntParameter extends AbstractParameter
         if (!result) {
             failureCount++;
             for (NotPositiveFailureCallback errorCallback : errorCallbacks)
-                errorCallback.notPositiveError(this);
+                errorCallback.notPositiveFailure(this);
         }
 
         return result;
@@ -231,7 +231,7 @@ public class IntParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link IntParameter} is not positive.
      * <p>
-     * Notifies the {@link NotPositiveFailureCallback#notPositiveError(IntParameter)} method on the error handlers provided to
+     * Notifies the {@link NotPositiveFailureCallback#notPositiveFailure(IntParameter)} method on the error handlers provided to
      * this instance of {@link IntParameter} if the check fails.
      *
      * @return {@code true} if the check passes, {@code false} is all other cases.
@@ -255,7 +255,7 @@ public class IntParameter extends AbstractParameter
          *
          * @param parameter The {@link IntParameter} instance on which the {@code isNegative} check failed.
          */
-        boolean isNegativeFailure(IntParameter parameter);
+        void isNegativeFailure(IntParameter parameter);
     }
 
     /**
@@ -302,7 +302,7 @@ public class IntParameter extends AbstractParameter
          * @see IntParameter#notNegative()
          * @see IntParameter#notNegative(NotNegativeFailureCallback...)
          */
-        boolean notNegativeFailure(IntParameter parameter);
+        void notNegativeFailure(IntParameter parameter);
     }
 
     /**
@@ -351,7 +351,7 @@ public class IntParameter extends AbstractParameter
          * @param parameter The {@link IntParameter} instance on which the {@code isGreaterThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code isGreaterThan} check that failed.
          */
-        boolean isGreaterThanFailure(IntParameter parameter, int lower);
+        void isGreaterThanFailure(IntParameter parameter, int lower);
     }
 
     /**
@@ -402,7 +402,7 @@ public class IntParameter extends AbstractParameter
          * @param parameter The {@link IntParameter} instance on which the {@code notGreaterThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code notGreaterThan} check that failed.
          */
-        boolean notGreaterThanFailure(IntParameter parameter, int upper);
+        void notGreaterThanFailure(IntParameter parameter, int upper);
     }
 
     /**
@@ -452,7 +452,7 @@ public class IntParameter extends AbstractParameter
          * @see IntParameter#isLessThan(int)
          * @see IntParameter#isLessThan(int, IsLessThanFailureCallback...)
          */
-        boolean isLessThanFailure(IntParameter parameter, int upper);
+        void isLessThanFailure(IntParameter parameter, int upper);
     }
 
     /**
@@ -477,7 +477,7 @@ public class IntParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link IntParameter} is less than the provided upper bound.
      * <p>
-     * Notifies the {@link IsLessThanFailureCallback#isLessThan(int)} method on the error
+     * Notifies the {@link IsLessThanFailureCallback#isLessThanFailure(IntParameter, int)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param upper The upper bound which the internal value of the {@link IntParameter} must not exceed.
@@ -503,7 +503,7 @@ public class IntParameter extends AbstractParameter
          * @param parameter The {@link IntParameter} instance on which the {@code notLessThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code notLessThan} check that failed.
          */
-        boolean notLessThanFailure(IntParameter parameter, int lower);
+        void notLessThanFailure(IntParameter parameter, int lower);
     }
 
     /**
@@ -528,7 +528,7 @@ public class IntParameter extends AbstractParameter
     /**
      * Checks that the internal value of the {@link IntParameter} is not less than the provided lower bound.
      * <p>
-     * Notifies the {@link NotLessThanFailureCallback#notLessThan(int)} method on the error
+     * Notifies the {@link NotLessThanFailureCallback#notLessThanFailure(IntParameter, int)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param lower The lower bound which the internal value of the {@link IntParameter} must not exceed not equal.
@@ -555,8 +555,10 @@ public class IntParameter extends AbstractParameter
          *
          * @param parameter The {@link IntParameter} instance on which the {@code isBetween} check failed.
          * @param lower     The lower bound parameter provided to the {@code isBetween} check that failed.
+         * @param upper     The upper bound provided to the {@code isBetween} check that failed.
+         * @param inclusive The inclusive setting provided to the {@code isBetween} check that failed.
          */
-        boolean isBetweenError(IntParameter parameter, int lower, int upper, boolean inclusive);
+        void isBetweenFailure(IntParameter parameter, int lower, int upper, boolean inclusive);
     }
 
     /**
@@ -587,7 +589,7 @@ public class IntParameter extends AbstractParameter
         if (!result) {
             failureCount++;
             for (IsBetweenFailureCallback errorCallback : errorCallbacks)
-                errorCallback.isBetweenError(this, lower, upper, inclusive);
+                errorCallback.isBetweenFailure(this, lower, upper, inclusive);
         }
 
         return result;
@@ -621,7 +623,7 @@ public class IntParameter extends AbstractParameter
      * internal value of the {@link IntParameter} must conform to {@code value > lower && value < upper} for the check
      * to pass.
      * <p>
-     * Notifies the {@link NotLessThanFailureCallback#isBetween(int, int, boolean)} method on the error
+     * Notifies the {@link IsBetweenFailureCallback#isBetweenFailure(IntParameter, int, int, boolean)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param lower     The lower bound which the internal value of the {@link IntParameter} must exceed or equal
@@ -644,7 +646,7 @@ public class IntParameter extends AbstractParameter
      * {@link IntParameter#isBetween(int, int, boolean, IsBetweenFailureCallback...)} method, where the inclusivity setting
      * can be provided as a parameter.
      * <p>
-     * Notifies the {@link NotLessThanFailureCallback#isBetween(int, int, boolean)} method on the error
+     * Notifies the {@link IsBetweenFailureCallback#isBetweenFailure(IntParameter, int, int, boolean)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param lower The lower bound which the internal value of the {@link IntParameter} must exceed or equal
@@ -678,7 +680,7 @@ public class IntParameter extends AbstractParameter
          * @param upper     The upper bound parameter provided to the {@code notBetween} check that failed.
          * @param inclusive The inclusive parameter provided to the {@code notBetween} check that failed.
          */
-        boolean notBetweenError(IntParameter parameter, int lower, int upper, boolean inclusive);
+        void notBetweenFailure(IntParameter parameter, int lower, int upper, boolean inclusive);
     }
 
     /**
@@ -709,7 +711,7 @@ public class IntParameter extends AbstractParameter
         if (!result) {
             failureCount++;
             for (NotBetweenFailureCallback errorCallback : errorCallbacks)
-                errorCallback.notBetweenError(this, lower, upper, inclusive);
+                errorCallback.notBetweenFailure(this, lower, upper, inclusive);
         }
 
         return result;
@@ -743,7 +745,7 @@ public class IntParameter extends AbstractParameter
      * internal value of the {@link IntParameter} must conform to {@code value < lower || value > upper} for the check
      * to pass.
      * <p>
-     * Notifies the {@link NotBetweenFailureCallback#notBetween(int, int, boolean)} method on the error
+     * Notifies the {@link NotBetweenFailureCallback#notBetweenFailure(IntParameter, int, int, boolean)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param lower     The lower bound which the internal value of the {@link IntParameter} must not exceed, and may
@@ -765,7 +767,7 @@ public class IntParameter extends AbstractParameter
      * {@link IntParameter#notBetween(int, int, boolean, NotBetweenFailureCallback...)}  method, where the inclusivity setting
      * can be provided as a parameter.
      * <p>
-     * Notifies the {@link NotBetweenFailureCallback#notBetween(int, int, boolean)} method on the error
+     * Notifies the {@link NotBetweenFailureCallback#notBetweenFailure(IntParameter, int, int, boolean)} method on the error
      * handlers provided to this instance of {@link IntParameter} if the check fails.
      *
      * @param lower The lower bound which the internal value of the {@link IntParameter} must not exceed nor equal
