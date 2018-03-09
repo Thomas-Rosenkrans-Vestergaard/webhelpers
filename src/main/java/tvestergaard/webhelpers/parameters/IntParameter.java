@@ -440,6 +440,9 @@ public class IntParameter extends AbstractParameter
 
     /**
      * The functional interface defining the routine notified when the {@code isLessThan} check fails.
+     *
+     * @see IntParameter#isLessThan(int)
+     * @see IntParameter#isLessThan(int, IsLessThanFailureCallback...)
      */
     @FunctionalInterface public interface IsLessThanFailureCallback
     {
@@ -449,8 +452,6 @@ public class IntParameter extends AbstractParameter
          *
          * @param parameter The {@link IntParameter} instance on which the {@code isLessThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code isLessThan} check that failed.
-         * @see IntParameter#isLessThan(int)
-         * @see IntParameter#isLessThan(int, IsLessThanFailureCallback...)
          */
         void isLessThanFailure(IntParameter parameter, int upper);
     }
