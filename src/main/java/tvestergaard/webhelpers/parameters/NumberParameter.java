@@ -16,6 +16,9 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      */
     private final V zero;
 
+    /**
+     * The failure handlers registered with the {@link NumberParameter}.
+     */
     private final Iterable<? extends FailureHandler<K, V>> failureHandlers;
 
     /**
