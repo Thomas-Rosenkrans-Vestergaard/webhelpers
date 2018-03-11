@@ -1,6 +1,12 @@
 package tvestergaard.webhelpers.parameters;
 
-public interface Parameter
+/**
+ * Name to value pair for instances of {@link Parameter}.
+ *
+ * @param <N> The type of the name of the {@link Parameter}.
+ * @param <V> The type of the value in the {@link Parameter}.
+ */
+public interface Parameter<N, V>
 {
 
     /**
@@ -8,14 +14,14 @@ public interface Parameter
      *
      * @return The name of this {@link Parameter}.
      */
-    String getName();
+    N getName();
 
     /**
      * Returns the value of this {@link Parameter}.
      *
      * @return The value of this {@link Parameter}.
      */
-    Object getValue();
+    V getValue();
 
     /**
      * Returns the number of failures that occurred while performing checks on this {@link Parameter}.
@@ -33,5 +39,16 @@ public interface Parameter
     default boolean hasFailures()
     {
         return getFailureCount() > 0;
+    }
+
+    /**
+     * The interface contract for failure handlers.
+     *
+     * @param <K> The type of the name of the {@link Parameter} handled by the {@link FailureHandler}.
+     * @param <V> The type of the value of the {@link Parameter} handled by the {@link FailureHandler}.
+     */
+    interface FailureHandler<K, V>
+    {
+
     }
 }
