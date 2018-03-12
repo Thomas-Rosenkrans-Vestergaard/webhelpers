@@ -1,32 +1,48 @@
 package tvestergaard.webhelpers.parameters;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+
 /**
- * {@link Parameter} implementations for performing checks upon {@code Float} values.
+ * {@link NumberParameter} implementation using {@link Float} values.
  *
- * @param <K> The type of the name of the {@link FloatParameter}.
+ * @param <N> The type of the name of the {@link FloatParameter}.
  */
-public class FloatParameter<K> extends NumberParameter<K, Float>
+public class FloatParameter<N> extends NumberParameter<N, Float>
 {
 
     /**
-     * Creates a new {@link FloatParameter}.
+     * Creates a new {@link FloatParameter} using the provided {@code name} and {@code value}.
      *
-     * @param name            The name of the {@link FloatParameter}.
-     * @param value           The value of the {@link FloatParameter}.
-     * @param failureHandlers The failure handlers to register in the {@link FloatParameter}.
+     * @param name  The name of the {@link FloatParameter}.
+     * @param value The value of the {@link FloatParameter}.
      */
-    public FloatParameter(K name, Float value, Iterable<FailureHandler<K>> failureHandlers)
+    public FloatParameter(N name, Float value)
     {
-        super(name, value, 0f, failureHandlers);
+        super(name, value, 0f, new LinkedList<>());
     }
 
     /**
-     * Contains the failure handler callbacks for checks in the {@link FloatParameter} class.
+     * Creates a new {@link FloatParameter} using the provided {@code name}, {@code value} and {@code failureHandler}.
      *
-     * @param <K> The type of the name of the {@link FloatParameter}.
+     * @param name           The name of the {@link FloatParameter}.
+     * @param value          The value of the {@link FloatParameter}.
+     * @param failureHandler The failure handler to register with the {@link FloatParameter}.
      */
-    interface FailureHandler<K> extends NumberParameter.FailureHandler<K, Float>
+    public FloatParameter(N name, Float value, FailureHandler<N, Float> failureHandler)
     {
+        super(name, value, 0f, Arrays.asList(failureHandler));
+    }
 
+    /**
+     * Creates a new {@link FloatParameter} using the provided {@code name}, {@code value} and {@code failureHandlers}.
+     *
+     * @param name            The name of the {@link FloatParameter}.
+     * @param value           The value of the {@link FloatParameter}.
+     * @param failureHandlers The failure handlers to register with the {@link FloatParameter}.
+     */
+    public FloatParameter(N name, Float value, Iterable<? extends FailureHandler<N, Float>> failureHandlers)
+    {
+        super(name, value, 0f, failureHandlers);
     }
 }

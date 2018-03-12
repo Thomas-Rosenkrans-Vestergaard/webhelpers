@@ -3,7 +3,7 @@ package tvestergaard.webhelpers.parameters;
 /**
  * Thrown when a factory method cannot create a {@link Parameter} from a provided key value pair.
  */
-public class ParameterFormatException extends RuntimeException
+public class ParameterConversionException extends RuntimeException
 {
 
     /**
@@ -27,11 +27,11 @@ public class ParameterFormatException extends RuntimeException
     private final String message;
 
     /**
-     * Creates a new {@link ParameterFormatException}.
+     * Creates a new {@link ParameterConversionException}.
      *
      * @param parameterType
      */
-    public ParameterFormatException(String parameterName, String parameterValue, Class<? extends Parameter> parameterType)
+    public ParameterConversionException(String parameterName, String parameterValue, Class<? extends Parameter> parameterType)
     {
         this.parameterName = parameterName;
         this.parameterValue = parameterValue;

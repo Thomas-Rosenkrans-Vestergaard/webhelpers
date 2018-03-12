@@ -1,6 +1,7 @@
 package tvestergaard.webhelpers.parameters;
 
-import static tvestergaard.webhelpers.parameters.Parameters.iterable;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * An implementation of the {@link Parameter} interface for use on {@code Comparable} value types.
@@ -19,9 +20,32 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * Creates a new {@link ComparableParameter}.
      *
+     * @param name  The name of the {@link ComparableParameter}.
+     * @param value The value of the {@link ComparableParameter}.
+     */
+    public ComparableParameter(N name, V value)
+    {
+        this(name, value, new ArrayList<>());
+    }
+
+    /**
+     * Creates a new {@link ComparableParameter}.
+     *
+     * @param name           The name of the {@link ComparableParameter}.
+     * @param value          The value of the {@link ComparableParameter}.
+     * @param failureHandler The failure handler to register with the {@link ComparableParameter}.
+     */
+    public ComparableParameter(N name, V value, FailureHandler<N, V> failureHandler)
+    {
+        this(name, value, Arrays.asList(failureHandler));
+    }
+
+    /**
+     * Creates a new {@link ComparableParameter}.
+     *
      * @param name            The name of the {@link ComparableParameter}.
      * @param value           The value of the {@link ComparableParameter}.
-     * @param failureHandlers The {@link FailureHandler}s to register with the {@link ComparableParameter}.
+     * @param failureHandlers The failure handlers to register with the {@link ComparableParameter}.
      */
     public ComparableParameter(N name, V value, Iterable<? extends FailureHandler<N, V>> failureHandlers)
     {
@@ -33,11 +57,14 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code isGreaterThan} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link IsGreaterThanFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link IsGreaterThanFailureCallback}.
+     *
      * @see ComparableParameter#isGreaterThan(Comparable)
      * @see ComparableParameter#isGreaterThan(Comparable, IsGreaterThanFailureCallback)
      * @see ComparableParameter#isGreaterThan(Comparable, Iterable)
      */
-    @FunctionalInterface public interface IsGreaterThanFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface IsGreaterThanFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -46,11 +73,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code isGreaterThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code isGreaterThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isGreaterThan(Comparable)
          * @see ComparableParameter#isGreaterThan(Comparable, IsGreaterThanFailureCallback)
          * @see ComparableParameter#isGreaterThan(Comparable, Iterable)
          */
-        void isGreaterThanFailure(ComparableParameter<K, V> parameter, V lower);
+        void isGreaterThanFailure(ComparableParameter<N, V> parameter, V lower) throws NullParameterValueException;
     }
 
     /**
@@ -83,7 +111,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean isGreaterThan(V lower, IsGreaterThanFailureCallback<N, V> failureCallback)
     {
-        return isGreaterThan(lower, iterable(failureCallback));
+        return isGreaterThan(lower, Arrays.asList(failureCallback));
     }
 
     /**
@@ -104,11 +132,14 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code notGreaterThan} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link NotGreaterThanFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link NotGreaterThanFailureCallback}.
+     *
      * @see ComparableParameter#notGreaterThan(Comparable)
      * @see ComparableParameter#notGreaterThan(Comparable, NotGreaterThanFailureCallback)
      * @see ComparableParameter#notGreaterThan(Comparable, Iterable)
      */
-    @FunctionalInterface public interface NotGreaterThanFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface NotGreaterThanFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -117,11 +148,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code notGreaterThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code notGreaterThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notGreaterThan(Comparable)
          * @see ComparableParameter#notGreaterThan(Comparable, NotGreaterThanFailureCallback)
          * @see ComparableParameter#notGreaterThan(Comparable, Iterable)
          */
-        void notGreaterThanFailure(ComparableParameter<K, V> parameter, V upper);
+        void notGreaterThanFailure(ComparableParameter<N, V> parameter, V upper) throws NullParameterValueException;
     }
 
     /**
@@ -154,7 +186,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean notGreaterThan(V upper, NotGreaterThanFailureCallback<N, V> failureCallback)
     {
-        return notGreaterThan(upper, iterable(failureCallback));
+        return notGreaterThan(upper, Arrays.asList(failureCallback));
     }
 
     /**
@@ -175,11 +207,14 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code isLessThan} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link IsLessThanFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link IsLessThanFailureCallback}.
+     *
      * @see ComparableParameter#isLessThan(Comparable)
      * @see ComparableParameter#isLessThan(Comparable, IsLessThanFailureCallback)
      * @see ComparableParameter#isLessThan(Comparable, Iterable)
      */
-    @FunctionalInterface public interface IsLessThanFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface IsLessThanFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -188,11 +223,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code isLessThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code isLessThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isLessThan(Comparable)
          * @see ComparableParameter#isLessThan(Comparable, IsLessThanFailureCallback)
          * @see ComparableParameter#isLessThan(Comparable, Iterable)
          */
-        void isLessThanFailure(ComparableParameter<K, V> parameter, V upper);
+        void isLessThanFailure(ComparableParameter<N, V> parameter, V upper) throws NullParameterValueException;
     }
 
     /**
@@ -225,7 +261,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean isLessThan(V upper, IsLessThanFailureCallback<N, V> failureCallback)
     {
-        return isLessThan(upper, iterable(failureCallback));
+        return isLessThan(upper, Arrays.asList(failureCallback));
     }
 
     /**
@@ -246,11 +282,14 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code notLessThan} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link NotLessThanFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link NotLessThanFailureCallback}.
+     *
      * @see ComparableParameter#notLessThan(Comparable)
      * @see ComparableParameter#notLessThan(Comparable, NotLessThanFailureCallback)
      * @see ComparableParameter#notLessThan(Comparable, Iterable)
      */
-    @FunctionalInterface public interface NotLessThanFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface NotLessThanFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -259,11 +298,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code notLessThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code notLessThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notLessThan(Comparable)
          * @see ComparableParameter#notLessThan(Comparable, NotLessThanFailureCallback)
          * @see ComparableParameter#notLessThan(Comparable, Iterable)
          */
-        void notLessThanFailure(ComparableParameter<K, V> parameter, V lower);
+        void notLessThanFailure(ComparableParameter<N, V> parameter, V lower) throws NullParameterValueException;
     }
 
     /**
@@ -296,7 +336,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean notLessThan(V lower, NotLessThanFailureCallback<N, V> failureCallback)
     {
-        return notLessThan(lower, iterable(failureCallback));
+        return notLessThan(lower, Arrays.asList(failureCallback));
     }
 
     /**
@@ -317,6 +357,9 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code isBetween} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link IsBetweenFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link IsBetweenFailureCallback}.
+     *
      * @see ComparableParameter#isBetween(Comparable, Comparable)
      * @see ComparableParameter#isBetween(Comparable, Comparable, Iterable)
      * @see ComparableParameter#isBetween(Comparable, Comparable, IsBetweenFailureCallback)
@@ -324,7 +367,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, Iterable)
      * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, IsBetweenFailureCallback)
      */
-    @FunctionalInterface public interface IsBetweenFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface IsBetweenFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -335,6 +378,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param upper     The upper bound provided to the {@code isBetween} check that failed.
          * @param inclusive The inclusive setting provided to the {@code isBetween} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isBetween(Comparable, Comparable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, Iterable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, IsBetweenFailureCallback)
@@ -342,7 +386,8 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, Iterable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, IsBetweenFailureCallback)
          */
-        void isBetweenFailure(ComparableParameter<K, V> parameter, V lower, V upper, boolean inclusive);
+        void isBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive)
+                throws NullParameterValueException;
     }
 
     /**
@@ -399,7 +444,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean isBetween(V lower, V upper, boolean inclusive, IsBetweenFailureCallback<N, V> failureCallback)
     {
-        return isBetween(lower, upper, inclusive, iterable(failureCallback));
+        return isBetween(lower, upper, inclusive, Arrays.asList(failureCallback));
     }
 
     /**
@@ -441,7 +486,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean isBetween(V lower, V upper, IsBetweenFailureCallback<N, V> failureCallback)
     {
-        return isBetween(lower, upper, true, iterable(failureCallback));
+        return isBetween(lower, upper, true, Arrays.asList(failureCallback));
     }
 
     /**
@@ -495,6 +540,9 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
     /**
      * The functional interface defining the routine notified when the {@code notBetween} check fails.
      *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the {@link NotBetweenFailureCallback}.
+     * @param <V> The type of the value of the {@link ComparableParameter} handled by the {@link NotBetweenFailureCallback}.
+     *
      * @see ComparableParameter#notBetween(Comparable, Comparable)
      * @see ComparableParameter#notBetween(Comparable, Comparable, Iterable)
      * @see ComparableParameter#notBetween(Comparable, Comparable, NotBetweenFailureCallback)
@@ -502,7 +550,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, Iterable)
      * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, NotBetweenFailureCallback)
      */
-    @FunctionalInterface public interface NotBetweenFailureCallback<K, V extends Comparable<V>>
+    @FunctionalInterface public interface NotBetweenFailureCallback<N, V extends Comparable<V>>
     {
 
         /**
@@ -513,6 +561,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param upper     The upper bound parameter provided to the {@code notBetween} check that failed.
          * @param inclusive The inclusive parameter provided to the {@code notBetween} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notBetween(Comparable, Comparable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, Iterable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, NotBetweenFailureCallback)
@@ -520,7 +569,8 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, Iterable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, NotBetweenFailureCallback)
          */
-        void notBetweenFailure(ComparableParameter<K, V> parameter, V lower, V upper, boolean inclusive);
+        void notBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive)
+                throws NullParameterValueException;
     }
 
     /**
@@ -577,7 +627,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean notBetween(V lower, V upper, boolean inclusive, NotBetweenFailureCallback<N, V> failureCallback)
     {
-        return notBetween(lower, upper, inclusive, iterable(failureCallback));
+        return notBetween(lower, upper, inclusive, Arrays.asList(failureCallback));
     }
 
     /**
@@ -619,7 +669,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
      */
     public boolean notBetween(V lower, V upper, NotBetweenFailureCallback<N, V> failureCallback)
     {
-        return notBetween(lower, upper, iterable(failureCallback));
+        return notBetween(lower, upper, Arrays.asList(failureCallback));
     }
 
     /**
@@ -669,14 +719,19 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
         return notBetween(lower, upper, true);
     }
 
-    public interface FailureHandler<N, V extends Comparable<V>>
-            extends GenericParameter.FailureHandler<N, V>,
-                    IsGreaterThanFailureCallback<N, V>,
-                    NotGreaterThanFailureCallback<N, V>,
-                    IsLessThanFailureCallback<N, V>,
-                    NotLessThanFailureCallback<N, V>,
-                    IsBetweenFailureCallback<N, V>,
-                    NotBetweenFailureCallback<N, V>
+    /**
+     * The failure handler implementation for check failures in {@link ComparableParameter}s.
+     *
+     * @param <N> The type of the name of the {@link ComparableParameter} handled by the failure handler.
+     * @param <N> The type of the value of the {@link ComparableParameter} handled by the failure handler.
+     */
+    public interface FailureHandler<N, V extends Comparable<V>> extends GenericParameter.FailureHandler<N, V>,
+                                                                        IsGreaterThanFailureCallback<N, V>,
+                                                                        NotGreaterThanFailureCallback<N, V>,
+                                                                        IsLessThanFailureCallback<N, V>,
+                                                                        NotLessThanFailureCallback<N, V>,
+                                                                        IsBetweenFailureCallback<N, V>,
+                                                                        NotBetweenFailureCallback<N, V>
     {
 
         /**
@@ -685,11 +740,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code isGreaterThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code isGreaterThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isGreaterThan(Comparable)
          * @see ComparableParameter#isGreaterThan(Comparable, IsGreaterThanFailureCallback)
          * @see ComparableParameter#isGreaterThan(Comparable, Iterable)
          */
-        @Override default void isGreaterThanFailure(ComparableParameter<N, V> parameter, V lower)
+        @Override default void isGreaterThanFailure(ComparableParameter<N, V> parameter, V lower) throws NullParameterValueException
         {
 
         }
@@ -700,11 +756,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code notGreaterThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code notGreaterThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notGreaterThan(Comparable)
          * @see ComparableParameter#notGreaterThan(Comparable, NotGreaterThanFailureCallback)
          * @see ComparableParameter#notGreaterThan(Comparable, Iterable)
          */
-        @Override default void notGreaterThanFailure(ComparableParameter<N, V> parameter, V upper)
+        @Override default void notGreaterThanFailure(ComparableParameter<N, V> parameter, V upper) throws NullParameterValueException
         {
 
         }
@@ -715,11 +772,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code isLessThan} check failed.
          * @param upper     The upper bound parameter provided to the {@code isLessThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isLessThan(Comparable)
          * @see ComparableParameter#isLessThan(Comparable, IsLessThanFailureCallback)
          * @see ComparableParameter#isLessThan(Comparable, Iterable)
          */
-        @Override default void isLessThanFailure(ComparableParameter<N, V> parameter, V upper)
+        @Override default void isLessThanFailure(ComparableParameter<N, V> parameter, V upper) throws NullParameterValueException
         {
 
         }
@@ -730,11 +788,12 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param parameter The {@link ComparableParameter} instance on which the {@code notLessThan} check failed.
          * @param lower     The lower bound parameter provided to the {@code notLessThan} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notLessThan(Comparable)
          * @see ComparableParameter#notLessThan(Comparable, NotLessThanFailureCallback)
          * @see ComparableParameter#notLessThan(Comparable, Iterable)
          */
-        @Override default void notLessThanFailure(ComparableParameter<N, V> parameter, V lower)
+        @Override default void notLessThanFailure(ComparableParameter<N, V> parameter, V lower) throws NullParameterValueException
         {
 
         }
@@ -747,6 +806,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param upper     The upper bound provided to the {@code isBetween} check that failed.
          * @param inclusive The inclusive setting provided to the {@code isBetween} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#isBetween(Comparable, Comparable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, Iterable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, IsBetweenFailureCallback)
@@ -754,7 +814,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, Iterable)
          * @see ComparableParameter#isBetween(Comparable, Comparable, boolean, IsBetweenFailureCallback)
          */
-        @Override default void isBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive)
+        @Override default void isBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive) throws NullParameterValueException
         {
 
         }
@@ -767,6 +827,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @param upper     The upper bound parameter provided to the {@code notBetween} check that failed.
          * @param inclusive The inclusive parameter provided to the {@code notBetween} check that failed.
          *
+         * @throws NullParameterValueException When the value of the {@link ComparableParameter} is {@code null}.
          * @see ComparableParameter#notBetween(Comparable, Comparable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, Iterable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, NotBetweenFailureCallback)
@@ -774,7 +835,7 @@ public abstract class ComparableParameter<N, V extends Comparable<V>> extends Ge
          * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, Iterable)
          * @see ComparableParameter#notBetween(Comparable, Comparable, boolean, NotBetweenFailureCallback)
          */
-        @Override default void notBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive)
+        @Override default void notBetweenFailure(ComparableParameter<N, V> parameter, V lower, V upper, boolean inclusive) throws NullParameterValueException
         {
 
         }

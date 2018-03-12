@@ -1,5 +1,6 @@
 package tvestergaard.webhelpers.parameters;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      */
     public GenericParameter(N name, V value, FailureHandler<N, V> failureHandler)
     {
-        this(name, value, Parameters.iterable(failureHandler));
+        this(name, value, Arrays.asList(failureHandler));
     }
 
     /**
@@ -234,7 +235,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isEqual(V other, Iterable<? extends IsEqualFailureCallback<N, V>> failureCallbacks) throws NullValueException
+    public boolean isEqual(V other, Iterable<? extends IsEqualFailureCallback<N, V>> failureCallbacks) throws NullParameterValueException
     {
         nullCheck();
 
@@ -256,7 +257,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isEqual(V other, IsEqualFailureCallback<N, V> failureCallback) throws NullValueException
+    public boolean isEqual(V other, IsEqualFailureCallback<N, V> failureCallback) throws NullParameterValueException
     {
         nullCheck();
 
@@ -277,7 +278,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isEqual(V other) throws NullValueException
+    public boolean isEqual(V other) throws NullParameterValueException
     {
         return isEqual(other, failureHandlers);
     }
@@ -305,7 +306,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
          * @see GenericParameter#notEqual(V, Iterable)
          * @see GenericParameter#notEqual(V)
          */
-        void notEqualFailure(GenericParameter<N, V> parameter, V other) throws NullValueException;
+        void notEqualFailure(GenericParameter<N, V> parameter, V other) throws NullParameterValueException;
     }
 
     /**
@@ -462,7 +463,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      */
     public boolean isIn(V... others)
     {
-        return isIn(Parameters.list(others), failureHandlers);
+        return isIn(Arrays.asList(others), failureHandlers);
     }
 
     /**
@@ -565,18 +566,18 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      */
     public boolean notIn(V... others)
     {
-        return notIn(Parameters.list(others), failureHandlers);
+        return notIn(Arrays.asList(others), failureHandlers);
     }
 
     /**
      * Checks that the value in the {@link GenericParameter} is not {@code null}.
      *
-     * @throws NullValueException When the value in the {@link GenericParameter} is {@code null}.
+     * @throws NullParameterValueException When the value in the {@link GenericParameter} is {@code null}.
      */
-    private void nullCheck() throws NullValueException
+    private void nullCheck() throws NullParameterValueException
     {
         if (value == null)
-            throw new NullValueException();
+            throw new NullParameterValueException();
     }
 
     /**
@@ -647,7 +648,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
          * @see GenericParameter#notEqual(V, Iterable)
          * @see GenericParameter#notEqual(V)
          */
-        @Override default void notEqualFailure(GenericParameter<N, V> parameter, V other) throws NullValueException
+        @Override default void notEqualFailure(GenericParameter<N, V> parameter, V other) throws NullParameterValueException
         {
 
         }

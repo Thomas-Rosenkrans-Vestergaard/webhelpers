@@ -1,6 +1,6 @@
 package tvestergaard.webhelpers.parameters;
 
-import static tvestergaard.webhelpers.parameters.Parameters.iterable;
+import java.util.Arrays;
 
 /**
  * {@link Parameter} implementation for values of type {@code Number}.
@@ -164,7 +164,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      */
     public boolean notPositive(NotPositiveFailureCallback<K, V> failureCallback)
     {
-        return notPositive(iterable(failureCallback));
+        return notPositive(Arrays.asList(failureCallback));
     }
 
     /**

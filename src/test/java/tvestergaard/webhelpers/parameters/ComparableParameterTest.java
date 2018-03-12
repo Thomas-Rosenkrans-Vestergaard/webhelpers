@@ -11,11 +11,13 @@ import static tvestergaard.webhelpers.parameters.ComparableParameter.FailureHand
 public abstract class ComparableParameterTest extends GenericParameterTest
 {
 
-    abstract <N, V extends Comparable<V>> ComparableParameter<N, V> getInstance(N name, V value);
+    private final ParameterFactory<Integer, Integer, ? extends ComparableParameter<Integer, Integer>> factory;
 
-    abstract <N, V extends Comparable<V>, H extends FailureHandler<N, V>> ComparableParameter<N, V> getInstance(N name, V value, H handler);
-
-    abstract <N, V extends Comparable<V>, H extends FailureHandler<N, V>> ComparableParameter<N, V> getInstance(N name, V value, Iterable<? extends H> handlers);
+    public ComparableParameterTest(ParameterFactory<Integer, Integer, ? extends ComparableParameter<Integer, Integer>> factory)
+    {
+        super(factory);
+        this.factory = factory;
+    }
 
     @Test
     public void isGreaterThan() throws Exception
@@ -24,24 +26,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertTrue(parameter.isGreaterThan(2));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertFalse(parameter.isGreaterThan(5));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isGreaterThanThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isGreaterThan(5);
     }
 
@@ -52,24 +54,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.isGreaterThan(2, mock));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.isGreaterThan(5, mock));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isGreaterThanCallbackThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isGreaterThan(5, (a, b) -> {});
     }
 
@@ -80,24 +82,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.isGreaterThan(2, list(mock)));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.isGreaterThan(5, list(mock)));
         verify(mock, times(0)).isGreaterThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isGreaterThanIterableThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isGreaterThan(5, list(null));
     }
 
@@ -108,24 +110,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertTrue(parameter.notGreaterThan(7));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertFalse(parameter.notGreaterThan(4));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(4));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notGreaterThanThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notGreaterThan(5);
     }
 
@@ -136,24 +138,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.notGreaterThan(7, mock));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.notGreaterThan(2, mock));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(2));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notGreaterThanCallbackThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notGreaterThan(5, (a, b) -> {});
     }
 
@@ -164,24 +166,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.notGreaterThan(7, list(mock)));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.notGreaterThan(2, list(mock)));
         verify(mock, times(0)).notGreaterThanFailure(same(parameter), eq(2));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notGreaterThanIterableThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notGreaterThan(5, list(null));
     }
 
@@ -192,24 +194,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertTrue(parameter.isLessThan(7));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertFalse(parameter.isLessThan(5));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isLessThanThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isLessThan(5);
     }
 
@@ -220,24 +222,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.isLessThan(7, mock));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.isLessThan(5, mock));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isLessThanCallbackThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isLessThan(5, (a, b) -> {});
     }
 
@@ -248,24 +250,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.isLessThan(7, list(mock)));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(7));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.isLessThan(5, list(mock)));
         verify(mock, times(0)).isLessThanFailure(same(parameter), eq(5));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void isLessThanIterableThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.isLessThan(5, list(null));
     }
 
@@ -276,24 +278,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertTrue(parameter.notLessThan(2));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5, mock);
+        parameter = factory.getInstance(null, 5, mock);
         assertFalse(parameter.notLessThan(6));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(6));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notLessThanThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notLessThan(5);
     }
 
@@ -304,24 +306,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.notLessThan(2, mock));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.notLessThan(6, mock));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(6));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notLessThanCallbackThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notLessThan(5, (a, b) -> {});
     }
 
@@ -332,24 +334,24 @@ public abstract class ComparableParameterTest extends GenericParameterTest
         FailureHandler<Integer, Integer>      mock;
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertTrue(parameter.notLessThan(2, list(mock)));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(2));
         assertEquals(0, parameter.getFailureCount());
         assertFalse(parameter.hasFailures());
 
         mock = mock(FailureHandler.class);
-        parameter = getInstance(null, 5);
+        parameter = factory.getInstance(null, 5);
         assertFalse(parameter.notLessThan(6, list(mock)));
         verify(mock, times(0)).notLessThanFailure(same(parameter), eq(6));
         assertEquals(1, parameter.getFailureCount());
         assertTrue(parameter.hasFailures());
     }
 
-    @Test(expected = NullValueException.class)
+    @Test(expected = NullParameterValueException.class)
     public void notLessThanIterableThrowsNullValueException() throws Exception
     {
-        ComparableParameter<Integer, Integer> parameter = getInstance(null, null);
+        ComparableParameter<Integer, Integer> parameter = factory.getInstance(null, null);
         parameter.notLessThan(5, list(null));
     }
 

@@ -3,32 +3,35 @@ package tvestergaard.webhelpers.parameters;
 /**
  * An abstract implementation of the {@link Parameter} interface.
  *
- * @param <N> The type of the name of the {@link AbstractParameter}.
- * @param <V> The type of the value in the {@link AbstractParameter}.
+ * @param <N> The type of the name of the {@link Parameter}.
+ * @param <V> The type of the value in the {@link Parameter}.
  */
 public abstract class AbstractParameter<N, V> implements Parameter<N, V>
 {
 
     /**
-     * The name of the {@link AbstractParameter}.
+     * The name of the {@link Parameter}.
      */
     protected final N name;
 
     /**
-     * The value of the {@link AbstractParameter}.
+     * The value of the {@link Parameter}.
      */
     protected final V value;
 
     /**
-     * The number of errors that occurred during checks on this {@link AbstractParameter}.
+     * The number of failures that have occurred on checks performed on this instance of {@link Parameter}.
+     *
+     * @see AbstractParameter#getFailureCount()
+     * @see AbstractParameter#hasFailures()
      */
     private int failureCount = 0;
 
     /**
      * Creates a new {@link AbstractParameter}.
      *
-     * @param name  The name of the {@link AbstractParameter}.
-     * @param value The value of the {@link AbstractParameter}.
+     * @param name  The name of the {@link Parameter}.
+     * @param value The value of the {@link Parameter}.
      */
     public AbstractParameter(N name, V value)
     {
@@ -37,9 +40,9 @@ public abstract class AbstractParameter<N, V> implements Parameter<N, V>
     }
 
     /**
-     * Increments the counter controlling the number of checks that have failed on this parameter.
+     * Increments the counter recording the number of checks that have failed on this instance of {@link Parameter}.
      *
-     * @return The number of checks that have failed on this parameter.
+     * @return The number of checks that have failed on this instance of {@link Parameter}.
      */
     protected int incrementFailureCount()
     {
@@ -47,9 +50,9 @@ public abstract class AbstractParameter<N, V> implements Parameter<N, V>
     }
 
     /**
-     * Returns the name of the {@code parameter}.
+     * Returns the name of the {@link Parameter}.
      *
-     * @return The name of the {@code parameter}.
+     * @return The name of the {@link Parameter}.
      */
     @Override public final N getName()
     {
@@ -57,19 +60,19 @@ public abstract class AbstractParameter<N, V> implements Parameter<N, V>
     }
 
     /**
-     * Returns the value of the {@code parameter}.
+     * Returns the value of the {@link Parameter}.
      *
-     * @return The value of the {@code parameter}.
+     * @return The value of the {@link Parameter}.
      */
-    @Override public V getValue()
+    @Override public final V getValue()
     {
         return this.value;
     }
 
     /**
-     * Returns the number of failures that occurred while performing checks on this {@code parameter}.
+     * Returns the number of failures that have occurred on checks performed on this instance of {@link Parameter}.
      *
-     * @return The number of failures that occurred while performing checks on this {@code parameter}.
+     * @return The number of failures that have occurred on checks performed on this instance of {@link Parameter}.
      */
     @Override public int getFailureCount()
     {
