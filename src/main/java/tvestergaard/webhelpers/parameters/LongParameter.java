@@ -1,8 +1,5 @@
 package tvestergaard.webhelpers.parameters;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-
 /**
  * {@link NumberParameter} implementation using {@link Long} values.
  *
@@ -17,32 +14,8 @@ public class LongParameter<N> extends NumberParameter<N, Long>
      * @param name  The name of the {@link LongParameter}.
      * @param value The value of the {@link LongParameter}.
      */
-    public LongParameter(N name, Long value)
+    public LongParameter(N name, Long value, Iterable<? extends NumberParameter.FailureHandler<N, Long>> onFailures)
     {
-        super(name, value, 0l, new LinkedList<>());
-    }
-
-    /**
-     * Creates a new {@link LongParameter} using the provided {@code name}, {@code value} and {@code failureHandler}.
-     *
-     * @param name           The name of the {@link LongParameter}.
-     * @param value          The value of the {@link LongParameter}.
-     * @param failureHandler The failure handler to register with the {@link LongParameter}.
-     */
-    public LongParameter(N name, Long value, FailureHandler<N, Long> failureHandler)
-    {
-        super(name, value, 0l, Arrays.asList(failureHandler));
-    }
-
-    /**
-     * Creates a new {@link LongParameter} using the provided {@code name}, {@code value} and {@code failureHandlers}.
-     *
-     * @param name            The name of the {@link LongParameter}.
-     * @param value           The value of the {@link LongParameter}.
-     * @param failureHandlers The failure handlers to register with the {@link LongParameter}.
-     */
-    public LongParameter(N name, Long value, Iterable<? extends FailureHandler<N, Long>> failureHandlers)
-    {
-        super(name, value, 0l, failureHandlers);
+        super(name, value, 0l, onFailures);
     }
 }

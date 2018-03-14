@@ -1,11 +1,9 @@
 package tvestergaard.webhelpers.parameters;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextParameter<N> extends GenericParameter<N, String>
+public class TextParameter<N> extends ComparableParameter<N, String>
 {
 
     /**
@@ -16,38 +14,15 @@ public class TextParameter<N> extends GenericParameter<N, String>
     /**
      * Creates a new {@link TextParameter}.
      *
-     * @param name  The name of the {@link TextParameter}.
-     * @param value The value of the {@link TextParameter}.
+     * @param name       The name of the {@link TextParameter}.
+     * @param value      The value of the {@link TextParameter}.
+     * @param onFailures The failure handlers to register with the {@link TextParameter}.
      */
-    public TextParameter(N name, String value)
+    public TextParameter(N name, String value, Iterable<? extends FailureHandler<N>> onFailures)
     {
-        this(name, value, new LinkedList<>());
-    }
+        super(name, value, onFailures);
 
-    /**
-     * Creates a new {@link TextParameter}.
-     *
-     * @param name           The name of the {@link TextParameter}.
-     * @param value          The value of the {@link TextParameter}.
-     * @param failureHandler The failure handler to register with the {@link TextParameter}.
-     */
-    public TextParameter(N name, String value, FailureHandler<N> failureHandler)
-    {
-        this(name, value, Arrays.asList(failureHandler));
-    }
-
-    /**
-     * Creates a new {@link TextParameter}.
-     *
-     * @param name            The name of the {@link TextParameter}.
-     * @param value           The value of the {@link TextParameter}.
-     * @param failureHandlers The failure handlers to register with the {@link TextParameter}.
-     */
-    public TextParameter(N name, String value, Iterable<? extends FailureHandler<N>> failureHandlers)
-    {
-        super(name, value, failureHandlers);
-
-        this.failureHandlers = failureHandlers;
+        this.failureHandlers = onFailures;
     }
 
     /**
@@ -1129,7 +1104,7 @@ public class TextParameter<N> extends GenericParameter<N, String>
      *
      * @param <N> The type of the name on the instance of {@link TextParameter} handled by the failure handler.
      */
-    interface FailureHandler<N> extends GenericParameter.FailureHandler<N, String>,
+    interface FailureHandler<N> extends ComparableParameter.FailureHandler<N, String>,
                                         IsEmptyFailureCallback<N>,
                                         NotEmptyFailureCallback<N>,
                                         IsLengthFailureCallback<N>,

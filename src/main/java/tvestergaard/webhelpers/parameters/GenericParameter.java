@@ -16,20 +16,17 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
     /**
      * The failure handlers registered with the {@link GenericParameter}.
      */
-    private Iterable<? extends FailureHandler<N, V>> failureHandlers;
+    private final Iterable<? extends FailureHandler<N, V>> failureHandlers;
 
     /**
      * Creates a new {@link GenericParameter}.
      *
-     * @param name            The name of the {@link GenericParameter}.
-     * @param value           The value of the {@link GenericParameter}.
-     * @param failureHandlers The failure handlers to register with the {@link GenericParameter}.
+     * @param name  The name of the {@link GenericParameter}.
+     * @param value The value of the {@link GenericParameter}.
      */
-    public GenericParameter(N name, V value, Iterable<? extends FailureHandler<N, V>> failureHandlers)
+    public GenericParameter(N name, V value)
     {
-        super(name, value);
-
-        this.failureHandlers = failureHandlers;
+        this(name, value, new LinkedList<>());
     }
 
     /**
@@ -47,12 +44,15 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
     /**
      * Creates a new {@link GenericParameter}.
      *
-     * @param name  The name of the {@link GenericParameter}.
-     * @param value The value of the {@link GenericParameter}.
+     * @param name            The name of the {@link GenericParameter}.
+     * @param value           The value of the {@link GenericParameter}.
+     * @param failureHandlers The failure handlers to register with the {@link GenericParameter}.
      */
-    public GenericParameter(N name, V value)
+    public GenericParameter(N name, V value, Iterable<? extends FailureHandler<N, V>> failureHandlers)
     {
-        this(name, value, new LinkedList<>());
+        super(name, value);
+
+        this.failureHandlers = failureHandlers;
     }
 
     /**
@@ -65,7 +65,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      * @see GenericParameter#isPresent(Iterable)
      * @see GenericParameter#isPresent()
      */
-    @FunctionalInterface interface IsPresentFailureCallback<N, V>
+    @FunctionalInterface interface IsPresentFailureCallback<N, V> extends CheckHandler<N, V>
     {
 
         /**
@@ -586,8 +586,7 @@ public class GenericParameter<N, V> extends AbstractParameter<N, V>
      * @param <N> The type of the name of the {@link Parameter} handled by the {@link FailureHandler}.
      * @param <V> The type of the value of the {@link Parameter} handled by the {@link FailureHandler}.
      */
-    interface FailureHandler<N, V> extends Parameter.FailureHandler<N, V>,
-                                           IsPresentFailureCallback<N, V>,
+    interface FailureHandler<N, V> extends IsPresentFailureCallback<N, V>,
                                            NotPresentFailureCallback<N, V>,
                                            IsEqualFailureCallback<N, V>,
                                            NotEqualFailureCallback<N, V>,

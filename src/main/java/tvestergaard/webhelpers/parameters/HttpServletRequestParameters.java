@@ -1,20 +1,42 @@
 package tvestergaard.webhelpers.parameters;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.function.Consumer;
 
-public interface Parameters<N>
+/**
+ * {@link Parameters} implementation allowing for validation of parameters provided to instances of {@link HttpServletRequest}.
+ */
+public class HttpServletRequestParameters extends AbstractParameters<String>
 {
+
+    /**
+     * The {@code HttpServletRequest} to validate the parameters of.
+     */
+    private final HttpServletRequest request;
+
+    /**
+     * Creates a new {@link HttpServletRequestParameters}.
+     *
+     * @param request The {@code HttpServletRequest} to validate the parameters of.
+     */
+    public HttpServletRequestParameters(HttpServletRequest request)
+    {
+        this.request = request;
+    }
 
     /**
      * Checks that the mapping associated with the provided {@code name} can safely be converted to an instance of
      * {@link TextParameter} using the {@link Parameters#getText(Object)} method. When this method returns {@code true},
-     * the {@link Parameters#getText(N)} method must not throw an exception when provided the same {@code name}.
+     * the {@link Parameters#getText(Object)} method must not throw an exception when provided the same {@code name}.
      *
      * @param name The name of the mapping to check.
      *
      * @return {@code true} if the mapping with the provided {@code name} can safely be converted to the instance of {@link TextParameter}.
      */
-    boolean isText(N name);
+    @Override public boolean isText(String name)
+    {
+        return true;
+    }
 
     /**
      * Returns an instance of {@link TextParameter} from the mapping of the provided {@code name}. When no mapping
@@ -27,7 +49,10 @@ public interface Parameters<N>
      * @throws ParameterConversionException When the mapping associated with the provided {@code name} cannot be converted
      *                                      to the instance of {@link TextParameter}.
      */
-    TextParameter<N> getText(N name) throws ParameterConversionException;
+    @Override public TextParameter<String> getText(String name) throws ParameterConversionException
+    {
+        return new TextParameter(name, request.getParameter(name), textParameterFailureHandlers);
+    }
 
     /**
      * Creates and provides to the {@code consumer} an instance of {@link TextParameter} from the mapping of the provided
@@ -40,18 +65,33 @@ public interface Parameters<N>
      * @return {@code true} when the checks performed on the instance of {@link TextParameter} during the execution of
      * the provided {@code Consumer} passed.
      */
-    boolean onText(N name, Consumer<TextParameter<N>> consumer) throws ParameterConversionException;
+    @Override public boolean onText(String name, Consumer<TextParameter<String>> consumer) throws ParameterConversionException
+    {
+        TextParameter<String> parameter = new TextParameter<>(name, request.getParameter(name), textParameterFailureHandlers);
+        consumer.accept(parameter);
+        return !parameter.hasFailures();
+    }
 
     /**
      * Checks that the mapping associated with the provided {@code name} can safely be converted to an instance of
      * {@link IntParameter} using the {@link Parameters#getInt(Object)} method. When this method returns {@code true},
-     * the {@link Parameters#getInt(N)} method must not throw an exception when provided the same {@code name}.
+     * the {@link Parameters#getInt(Object)} method must not throw an exception when provided the same {@code name}.
      *
      * @param name The name of the mapping to check.
      *
      * @return {@code true} if the mapping with the provided {@code name} can safely be converted to the instance of {@link IntParameter}.
      */
-    boolean isInt(N name);
+    @Override public boolean isInt(String name)
+    {
+        String value = request.getParameter(name);
+
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * Returns an instance of {@link IntParameter} from the mapping of the provided {@code name}. When no mapping
@@ -64,7 +104,15 @@ public interface Parameters<N>
      * @throws ParameterConversionException When the mapping associated with the provided {@code name} cannot be converted
      *                                      to the instance of {@link IntParameter}.
      */
-    IntParameter<N> getInt(N name) throws ParameterConversionException;
+    @Override public IntParameter<String> getInt(String name) throws ParameterConversionException
+    {
+        try {
+            int value = Integer.parseInt(request.getParameter(name));
+            return new IntParameter(name, value, intParameterFailureHandlers);
+        } catch (NumberFormatException e) {
+            throw new ParameterConversionException(e, IntParameter.class);
+        }
+    }
 
     /**
      * Creates and provides to the {@code consumer} an instance of {@link IntParameter} from the mapping of the provided
@@ -77,18 +125,31 @@ public interface Parameters<N>
      * @return {@code true} when the checks performed on the instance of {@link IntParameter} during the execution of
      * the provided {@code Consumer} passed.
      */
-    boolean onInt(N name, Consumer<IntParameter<N>> consumer) throws ParameterConversionException;
+    @Override public boolean onInt(String name, Consumer<IntParameter<String>> consumer) throws ParameterConversionException
+    {
+        IntParameter<String> parameter = getInt(name);
+        consumer.accept(parameter);
+        return !parameter.hasFailures();
+    }
 
     /**
      * Checks that the mapping associated with the provided {@code name} can safely be converted to an instance of
      * {@link LongParameter} using the {@link Parameters#getLong(Object)} method. When this method returns {@code true},
-     * the {@link Parameters#getLong(N)} method must not throw an exception when provided the same {@code name}.
+     * the {@link Parameters#getLong(Object)} method must not throw an exception when provided the same {@code name}.
      *
      * @param name The name of the mapping to check.
      *
      * @return {@code true} if the mapping with the provided {@code name} can safely be converted to the instance of {@link LongParameter}.
      */
-    boolean isLong(N name);
+    @Override public boolean isLong(String name)
+    {
+        try {
+            Long.parseLong(request.getParameter(name));
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 
     /**
      * Returns an instance of {@link LongParameter} from the mapping of the provided {@code name}. When no mapping
@@ -101,7 +162,14 @@ public interface Parameters<N>
      * @throws ParameterConversionException When the mapping associated with the provided {@code name} cannot be converted
      *                                      to the instance of {@link LongParameter}.
      */
-    LongParameter<N> getLong(N name) throws ParameterConversionException;
+    @Override public LongParameter<String> getLong(String name) throws ParameterConversionException
+    {
+        try {
+            return new LongParameter<>(name, Long.parseLong(request.getParameter(name)), longParameterFailureHandlers);
+        } catch (NumberFormatException e) {
+            throw new ParameterConversionException(e, LongParameter.class);
+        }
+    }
 
     /**
      * Creates and provides to the {@code consumer} an instance of {@link LongParameter} from the mapping of the provided
@@ -114,18 +182,31 @@ public interface Parameters<N>
      * @return {@code true} when the checks performed on the instance of {@link LongParameter} during the execution of
      * the provided {@code Consumer} passed.
      */
-    boolean onLong(N name, Consumer<LongParameter<N>> consumer) throws ParameterConversionException;
+    @Override public boolean onLong(String name, Consumer<LongParameter<String>> consumer) throws ParameterConversionException
+    {
+        LongParameter<String> parameter = getLong(name);
+        consumer.accept(parameter);
+        return !parameter.hasFailures();
+    }
 
     /**
      * Checks that the mapping associated with the provided {@code name} can safely be converted to an instance of
      * {@link FloatParameter} using the {@link Parameters#getFloat(Object)} method. When this method returns {@code true},
-     * the {@link Parameters#getFloat(N)} method must not throw an exception when provided the same {@code name}.
+     * the {@link Parameters#getFloat(Object)} method must not throw an exception when provided the same {@code name}.
      *
      * @param name The name of the mapping to check.
      *
      * @return {@code true} if the mapping with the provided {@code name} can safely be converted to the instance of {@link FloatParameter}.
      */
-    boolean isFloat(N name);
+    @Override public boolean isFloat(String name)
+    {
+        try {
+            Float.parseFloat(request.getParameter(name));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * Returns an instance of {@link FloatParameter} from the mapping of the provided {@code name}. When no mapping
@@ -138,7 +219,14 @@ public interface Parameters<N>
      * @throws ParameterConversionException When the mapping associated with the provided {@code name} cannot be converted
      *                                      to the instance of {@link FloatParameter}.
      */
-    FloatParameter<N> getFloat(N name) throws ParameterConversionException;
+    @Override public FloatParameter<String> getFloat(String name) throws ParameterConversionException
+    {
+        try {
+            return new FloatParameter<>(name, Float.parseFloat(request.getParameter(name)), floatParameterFailureHandlers);
+        } catch (NumberFormatException e) {
+            throw new ParameterConversionException(e, FloatParameter.class);
+        }
+    }
 
     /**
      * Creates and provides to the {@code consumer} an instance of {@link FloatParameter} from the mapping of the provided
@@ -151,18 +239,37 @@ public interface Parameters<N>
      * @return {@code true} when the checks performed on the instance of {@link FloatParameter} during the execution of
      * the provided {@code Consumer} passed.
      */
-    boolean onFloat(N name, Consumer<FloatParameter<N>> consumer) throws ParameterConversionException;
+    @Override public boolean onFloat(String name, Consumer<FloatParameter<String>> consumer) throws ParameterConversionException
+    {
+        FloatParameter<String> parameter = getFloat(name);
+        consumer.accept(parameter);
+        return !parameter.hasFailures();
+    }
 
     /**
      * Checks that the mapping associated with the provided {@code name} can safely be converted to an instance of
      * {@link DoubleParameter} using the {@link Parameters#getDouble(Object)} method. When this method returns {@code true},
-     * the {@link Parameters#getDouble(N)} method must not throw an exception when provided the same {@code name}.
+     * the {@link Parameters#getDouble(Object)} method must not throw an exception when provided the same {@code name}.
      *
      * @param name The name of the mapping to check.
      *
      * @return {@code true} if the mapping with the provided {@code name} can safely be converted to the instance of {@link DoubleParameter}.
      */
-    boolean isDouble(N name);
+    @Override public boolean isDouble(String name)
+    {
+        String value = request.getParameter(name);
+
+        if (value == null)
+            return true;
+
+        try {
+
+            Double.parseDouble(request.getParameter(name));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * Returns an instance of {@link DoubleParameter} from the mapping of the provided {@code name}. When no mapping
@@ -175,7 +282,10 @@ public interface Parameters<N>
      * @throws ParameterConversionException When the mapping associated with the provided {@code name} cannot be converted
      *                                      to the instance of {@link DoubleParameter}.
      */
-    DoubleParameter<N> getDouble(N name) throws ParameterConversionException;
+    @Override public DoubleParameter<String> getDouble(String name) throws ParameterConversionException
+    {
+        return null;
+    }
 
     /**
      * Creates and provides to the {@code consumer} an instance of {@link DoubleParameter} from the mapping of the provided
@@ -188,45 +298,8 @@ public interface Parameters<N>
      * @return {@code true} when the checks performed on the instance of {@link DoubleParameter} during the execution of
      * the provided {@code Consumer} passed.
      */
-    boolean onDouble(N name, Consumer<DoubleParameter<N>> consumer) throws ParameterConversionException;
-
-    /**
-     * Adds an object to handle failure raised by checks performed on instances of {@link TextParameter} created by this
-     * object.
-     *
-     * @param onFailure The failure handler to add.
-     */
-    void addTextFailureHandler(TextParameter.FailureHandler<N> onFailure);
-
-    /**
-     * Adds an object to handle failure raised by checks performed on instances of {@link IntParameter} created by this
-     * object.
-     *
-     * @param onFailure The failure handler to add.
-     */
-    void addIntFailureHandler(IntParameter.FailureHandler<N, Integer> onFailure);
-
-    /**
-     * Adds an object to handle failure raised by checks performed on instances of {@link LongParameter} created by this
-     * object.
-     *
-     * @param onFailure The failure handler to add.
-     */
-    void addLongFailureHandler(LongParameter.FailureHandler<N, Long> onFailure);
-
-    /**
-     * Adds an object to handle failure raised by checks performed on instances of {@link FloatParameter} created by this
-     * object.
-     *
-     * @param onFailure The failure handler to add.
-     */
-    void addFloatFailureHandler(FloatParameter.FailureHandler<N, Float> onFailure);
-
-    /**
-     * Adds an object to handle failure raised by checks performed on instances of {@link DoubleParameter} created by this
-     * object.
-     *
-     * @param onFailure The failure handler to add.
-     */
-    void addDoubleFailureHandler(DoubleParameter.FailureHandler<N, Double> onFailure);
+    @Override public boolean onDouble(String name, Consumer<DoubleParameter<String>> consumer) throws ParameterConversionException
+    {
+        return false;
+    }
 }

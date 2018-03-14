@@ -5,10 +5,10 @@ import java.util.Arrays;
 /**
  * {@link Parameter} implementation for values of type {@code Number}.
  *
- * @param <K> The type of the key of the {@link NumberParameter}.
+ * @param <N> The type of the key of the {@link NumberParameter}.
  * @param <V> The type of the value of the {@link NumberParameter}.
  */
-public abstract class NumberParameter<K, V extends Number & Comparable<V>> extends ComparableParameter<K, V>
+public abstract class NumberParameter<N, V extends Number & Comparable<V>> extends ComparableParameter<N, V>
 {
 
     /**
@@ -19,7 +19,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
     /**
      * The failure handlers registered with the {@link NumberParameter}.
      */
-    private final Iterable<? extends FailureHandler<K, V>> failureHandlers;
+    private final Iterable<? extends FailureHandler<N, V>> failureHandlers;
 
     /**
      * Creates a new {@link NumberParameter}.
@@ -27,15 +27,15 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      * @param name            The name of the {@link NumberParameter}.
      * @param value           The value of the {@link NumberParameter}.
      * @param zero            The value representing zero in the type of {@code V}.
-     * @param failureHandlers The failure handlers that are notified when checks performed on this instance of
+     * @param onFailures The failure handlers that are notified when checks performed on this instance of
      *                        {@link NumberParameter} fails.
      */
-    public NumberParameter(K name, V value, V zero, Iterable<? extends FailureHandler<K, V>> failureHandlers)
+    public NumberParameter(N name, V value, V zero,Iterable<? extends FailureHandler<N, V>> onFailures)
     {
-        super(name, value, failureHandlers);
+        super(name, value, onFailures);
         this.zero = zero;
 
-        this.failureHandlers = failureHandlers;
+        this.failureHandlers = onFailures;
     }
 
     /**
@@ -70,12 +70,12 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isPositive(Iterable<? extends IsPositiveFailureCallback<K, V>> failureCallbacks)
+    public boolean isPositive(Iterable<? extends IsPositiveFailureCallback<N, V>> failureCallbacks)
     {
         boolean result = value.compareTo(zero) < 0;
         if (!result) {
             incrementFailureCount();
-            for (IsPositiveFailureCallback<K, V> failureCallback : failureCallbacks)
+            for (IsPositiveFailureCallback<N, V> failureCallback : failureCallbacks)
                 failureCallback.isPositiveFailure(this);
         }
 
@@ -89,7 +89,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isPositive(IsPositiveFailureCallback<K, V> failureCallback)
+    public boolean isPositive(IsPositiveFailureCallback<N, V> failureCallback)
     {
         boolean result = value.compareTo(zero) < 0;
         if (!result) {
@@ -143,12 +143,12 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean notPositive(Iterable<? extends NotPositiveFailureCallback<K, V>> failureCallbacks)
+    public boolean notPositive(Iterable<? extends NotPositiveFailureCallback<N, V>> failureCallbacks)
     {
         boolean result = value.compareTo(zero) <= 0;
         if (!result) {
             incrementFailureCount();
-            for (NotPositiveFailureCallback<K, V> failureCallback : failureCallbacks)
+            for (NotPositiveFailureCallback<N, V> failureCallback : failureCallbacks)
                 failureCallback.notPositiveFailure(this);
         }
 
@@ -162,7 +162,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} is all other cases.
      */
-    public boolean notPositive(NotPositiveFailureCallback<K, V> failureCallback)
+    public boolean notPositive(NotPositiveFailureCallback<N, V> failureCallback)
     {
         return notPositive(Arrays.asList(failureCallback));
     }
@@ -210,12 +210,12 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isNegative(Iterable<? extends IsNegativeFailureCallback<K, V>> failureCallbacks)
+    public boolean isNegative(Iterable<? extends IsNegativeFailureCallback<N, V>> failureCallbacks)
     {
         boolean result = value.compareTo(zero) < 0;
         if (!result) {
             incrementFailureCount();
-            for (IsNegativeFailureCallback<K, V> failureCallback : failureCallbacks)
+            for (IsNegativeFailureCallback<N, V> failureCallback : failureCallbacks)
                 failureCallback.isNegativeFailure(this);
         }
 
@@ -229,7 +229,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean isNegative(IsNegativeFailureCallback<K, V> failureCallback)
+    public boolean isNegative(IsNegativeFailureCallback<N, V> failureCallback)
     {
         boolean result = value.compareTo(zero) < 0;
         if (!result) {
@@ -283,12 +283,12 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean notNegative(Iterable<? extends NotNegativeFailureCallback<K, V>> failureCallbacks)
+    public boolean notNegative(Iterable<? extends NotNegativeFailureCallback<N, V>> failureCallbacks)
     {
         boolean result = value.compareTo(zero) >= 0;
         if (!result) {
             incrementFailureCount();
-            for (NotNegativeFailureCallback<K, V> failureCallback : failureCallbacks)
+            for (NotNegativeFailureCallback<N, V> failureCallback : failureCallbacks)
                 failureCallback.notNegativeFailure(this);
         }
 
@@ -302,7 +302,7 @@ public abstract class NumberParameter<K, V extends Number & Comparable<V>> exten
      *
      * @return {@code true} if the check passes, {@code false} if the check fails.
      */
-    public boolean notNegative(NotNegativeFailureCallback<K, V> failureCallback)
+    public boolean notNegative(NotNegativeFailureCallback<N, V> failureCallback)
     {
         boolean result = value.compareTo(zero) >= 0;
         if (!result) {
